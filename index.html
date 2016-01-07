@@ -3,6 +3,7 @@
   <head>
     <script src="js/Core/knockout-3.3.0.debug.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="js/Core/KnockoutExtensions.js"></script>
     <script src="js/Core/Namespace.js"></script>
     <script src="js/Core/Constants.js"></script>
     <script src="js/Core/Helpers.js"></script>
@@ -10,108 +11,115 @@
     <script src="js/Strings/en/Strings.js"></script>
     <script src="js/Resources.js"></script>
     <script src="js/Items.js"></script>
+    <script src="js/Pick.js"></script>
     <script src="js/Inventory.js"></script>
     <script src="js/Player.js"></script>
     <script src="js/Game.js"></script>
     <link type="text/css" href="css/styles.css" rel="stylesheet"  />
   </head>
   <body>
-    <div id="gatherActions">
-        <div id="gatherContainer">
-            <img data-bind="click: step, attr: { alt: strings['Gather'], title: strings['Gather'], src: pickImage }" />
-            <div id="durability" data-bind="visible: durability.visible, style: { width: durability.width, 'background-color': durability.backgroundColor }"></div>
-        </div>
-        <button id="gather" data-bind="click: step, text: gatherText"></button>
-    </div>
-    <div id="recipes">
-        <div id="experience" class="smallBar">
-            <div id="experienceBar" class="smallBar">
-                <div id="experienceBarText" class="smallBar smallBarText"></div>
+    <div id="container">
+        <div id="gatherActions">
+            <div>
+                <div id="gatherContainer">
+                    <img data-bind="click: step, attr: { alt: strings['Gather'], title: strings['Gather'], src: pickImage }" />
+                    <div id="durability" data-bind="visible: durability.visible, style: { width: durability.width, 'background-color': durability.backgroundColor }"></div>
+                </div>
             </div>
+            <div><button id="gather" data-bind="click: step, text: gatherText"></button></div>
         </div>
-        <div id="money"></div>
-        <div id="recipeFilters">
-            <select id="recipeCategoryFilter" data-bind="
-                options: recipeCategories.unlocked,
-                optionsText: 'name',
-                value: recipeCategories.selection,
-                optionsCaption: strings['AllCategories']">
-            </select>
-            <label>
-                <input id="haveResources" type="checkbox" data-bind="checked: onlyShowCraftableRecipes" />
-                <span data-bind="text: strings['HaveResources']"></span>
-            </label>
-            <input id="recipeSearch" data-bind="textInput: recipeSearchTerm" />
-        </div>
-        <div id="recipeScroll">
-            <ul id="recipeCategories" data-bind="template: { name: 'recipe-category-template', foreach: recipeCategories.unlocked, as: 'category' }"></ul>
-            <script type="text/html" id="recipe-category-template">
-                <li data-bind="visible: category.visible">
-                    <span data-bind="text: category.name"></span>
-                    <ul class="recipeCategory" data-bind="template: { name: 'recipe-item-template', foreach: category.items, as: 'item' }"></ul>
-                </li>
-            </script>
-            <script type="text/html" id="recipe-item-template">
-                <li data-bind="
-                    click: $root.selectRecipe,
-                    visible: item.visible,
-                    style:
-                    {
-                        color: item.recipe.color,
-                        'background-color': item.recipe.backgroundColor
-                    },
-                    css:
-                    {
-                        'selectedRecipe': item.selected,
-                        'craftingRecipe': item.crafting
-                    }">
+        <div id="recipes">
+            <div id="experience" class="smallBar">
+                <div id="experienceBar" class="smallBar">
+                    <div id="experienceBarText" class="smallBar smallBarText"></div>
+                </div>
+            </div>
+            <div id="money"></div>
+            <div id="recipeFilters">
+                <select id="recipeCategoryFilter" data-bind="
+                    options: recipeCategories.unlocked,
+                    optionsText: 'name',
+                    value: recipeCategories.selection,
+                    optionsCaption: strings['AllCategories']">
+                </select>
+                <label>
+                    <input id="haveResources" type="checkbox" data-bind="checked: onlyShowCraftableRecipes" />
+                    <span data-bind="text: strings['HaveResources']"></span>
+                </label>
+                <input id="recipeSearch" data-bind="textInput: recipeSearchTerm" />
+            </div>
+            <div id="recipeScroll">
+                <ul id="recipeCategories" data-bind="template: { name: 'recipe-category-template', foreach: recipeCategories.unlocked, as: 'category' }"></ul>
+                <script type="text/html" id="recipe-category-template">
+                    <li data-bind="visible: category.visible">
+                        <span data-bind="text: category.name"></span>
+                        <ul class="recipeCategory" data-bind="template: { name: 'recipe-item-template', foreach: category.items, as: 'item' }"></ul>
+                    </li>
+                </script>
+                <script type="text/html" id="recipe-item-template">
+                    <li data-bind="
+                        click: $root.selectRecipe,
+                        visible: item.visible,
+                        event: { 'dblclick': $root.allowCraft() && $root.craft },
+                        style:
+                        {
+                            color: item.recipe.color,
+                            'background-color': item.recipe.backgroundColor
+                        },
+                        css:
+                        {
+                            'selectedRecipe': item.selected,
+                            'craftingRecipe': item.crafting
+                        }">
 
-                    <div class="recipeName">
-                        <span data-bind="text: item.name"></span>
-                    </div>
-                </li>
-            </script>
-        </div>
-        <div id="recipeRequirementsScroll" data-bind="if: selectedRecipe.item">
-            <div id="recipeRequirements" data-bind="with: selectedRecipe">
-                <h1 id="recipeName" data-bind="text: name"></h1>
-                <h4 id="craftTime" data-bind="text: craftTime"></h4>
-                <table id="recipeRequirementList">
-                    <tbody data-bind="template: { name: 'recipe-requirement-template', foreach: requirements, as: 'requirement' }"></tbody>
-                </table>
-                <script type="text/html" id="recipe-requirement-template">
-                    <tr>
-                        <td class="alignRight" data-bind="text: requirement.amount"></td>
-                        <td>
-                            <span data-bind="text: requirement.item.name"></span>
-                            (<span class="amount" data-bind="text: requirement.currentInventory"></span>)
-                        </td>
-                    </tr>
+                        <div class="recipeName">
+                            <span data-bind="text: item.name"></span>
+                        </div>
+                    </li>
                 </script>
             </div>
+            <div id="recipeRequirementsScroll" data-bind="if: selectedRecipe.item">
+                <div id="recipeRequirements" data-bind="with: selectedRecipe">
+                    <h1 id="recipeName" data-bind="text: name"></h1>
+                    <h4 id="craftTime" data-bind="text: craftTime"></h4>
+                    <table id="recipeRequirementList">
+                        <tbody data-bind="template: { name: 'recipe-requirement-template', foreach: requirements, as: 'requirement' }"></tbody>
+                    </table>
+                    <script type="text/html" id="recipe-requirement-template">
+                        <tr>
+                            <td class="alignRight" data-bind="text: requirement.amount"></td>
+                            <td>
+                                <span data-bind="text: requirement.item.name"></span>
+                                (<span class="amount" data-bind="text: requirement.currentInventory"></span>)
+                            </td>
+                        </tr>
+                    </script>
+                </div>
+            </div>
+            <div id="actions">
+                <input id="craftAll" type="button" data-bind="click: craftAll, value: strings['CraftAll'], enable: allowCraft" />
+                <input id="craftAmount" value="1" data-bind="numeric, textInput: craftAmount" />
+                <input id="craft" type="button" data-bind="click: craft, value: strings['Craft'], visible: allowCraft" />
+                <input id="cancel" type="button" data-bind="click: cancelCraft, value: strings['Cancel'], visible: !allowCraft()" />
+            </div>
         </div>
-        <div id="actions">
-            <input id="craftAll" type="button" value="Craft All" disabled="disabled" />
-            <input id="craftAmount" value="1" onkeypress='return event.charCode >= 48 && event.charCode <= 57' />
-            <input id="craft" type="button" value="Craft" data-bind="click: craft, text: strings['Craft'], enable: selectedRecipe.item" />
-        </div>
-    </div>
-    <div id="inventory">
-        <table id="inventoryTable" data-bind="visible: inventory.visible">
-            <thead>
+        <div id="inventory">
+            <table id="inventoryTable" data-bind="visible: inventory.visible">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody data-bind="template: { name: 'inventory-template', foreach: player.inventory.itemsArray, as: 'item' }"></tbody>
+            </table>
+            <script type="text/html" id="inventory-template">
                 <tr>
-                    <th>Item</th>
-                    <th>Amount</th>
+                    <td data-bind="text: item.name"></td>
+                    <td data-bind="text: amount"></td>
                 </tr>
-            </thead>
-            <tbody data-bind="template: { name: 'inventory-template', foreach: player.inventory.itemsArray, as: 'item' }"></tbody>
-        </table>
-        <script type="text/html" id="inventory-template">
-            <tr>
-                <td data-bind="text: item.name"></td>
-                <td data-bind="text: amount"></td>
-            </tr>
-        </script>
+            </script>
+        </div>
     </div>
   </body>
 </html>

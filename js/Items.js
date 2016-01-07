@@ -49,8 +49,150 @@ OnSubmit.Using("Game", function (Game)
                     ]
                 }
             };
-                
-            
+
+            _items["Copper Bar"] =
+            {
+                type: Game.ItemType.Bar,
+                recipe:
+                {
+                    craftTime: 3,
+                    requirements:
+                    [
+                        { item: Game.Resources.get("Copper Ore"), amount: 1 },
+                        { item: Game.Resources.get("Coal"), amount: 1 },
+                    ]
+                }
+            };
+
+            _items["Iron Bar"] =
+            {
+                type: Game.ItemType.Bar,
+                recipe:
+                {
+                    craftTime: 3,
+                    requirements:
+                    [
+                        { item: Game.Resources.get("Iron Ore"), amount: 1 },
+                        { item: Game.Resources.get("Coal"), amount: 1 },
+                    ]
+                }
+            };
+
+            _items["Tin Bar"] =
+            {
+                type: Game.ItemType.Bar,
+                recipe:
+                {
+                    craftTime: 3,
+                    requirements:
+                    [
+                        { item: Game.Resources.get("Tin Ore"), amount: 1 },
+                        { item: Game.Resources.get("Coal"), amount: 1 },
+                    ]
+                }
+            };
+
+            _items["Gold Bar"] =
+            {
+                type: Game.ItemType.Bar,
+                recipe:
+                {
+                    craftTime: 3,
+                    requirements:
+                    [
+                         { item: Game.Resources.get("Gold Ore"), amount: 1 },
+                         { item: Game.Resources.get("Coal"), amount: 1 },
+                    ]
+                }
+            };
+
+            _items["Bronze Bar"] =
+            {
+                type: Game.ItemType.Bar,
+                recipe:
+                {
+                    craftTime: 3,
+                    requirements:
+                    [
+                          { item: _items["Tin Bar"], amount: 1 },
+                          { item: _items["Copper Bar"], amount: 1 },
+                          { item: Game.Resources.get("Coal"), amount: 1 },
+                    ]
+                }
+            };
+
+            _items["Bronze Rivet"] =
+            {
+                type: Game.ItemType.Other,
+                recipe:
+                {
+                    craftTime: 16,
+                    makes: 16,
+                    requirements:
+                    [
+                        { item: _items["Bronze Bar"], amount: 1 },
+                    ]
+                }
+            };
+
+            _items["Steel Bar"] =
+            {
+                type: Game.ItemType.Bar,
+                recipe:
+                {
+                    craftTime: 3,
+                    requirements:
+                    [
+                        { item: _items["Iron Bar"], amount: 1 },
+                        { item: Game.Resources.get("Coal"), amount: 1 },
+                    ]
+                }
+            };
+
+            _items["Aluminum Bar"] =
+            {
+                type: Game.ItemType.Bar,
+                recipe:
+                {
+                    craftTime: 3,
+                    makes: 2,
+                    requirements:
+                    [
+                        { item: Game.Resources.get("Bauxite Ore"), amount: 1 },
+                        { item: Game.Resources.get("Iron Ore"), amount: 1 },
+                        { item: Game.Resources.get("Coal"), amount: 1 },
+                    ]
+                }
+            };
+
+            _items["Aluminum Strips"] =
+            {
+                type: Game.ItemType.Other,
+                recipe:
+                {
+                    craftTime: 8,
+                    makes: 8,
+                    requirements:
+                    [
+                        { item: _items["Aluminum Bar"], amount: 1 },
+                    ]
+                }
+            };
+
+            _items["Lead Bar"] =
+            {
+                type: Game.ItemType.Bar,
+                recipe:
+                {
+                    craftTime: 3,
+                    requirements:
+                    [
+                        { item: Game.Resources.get("Lead Ore"), amount: 3 },
+                        { item: Game.Resources.get("Coal"), amount: 1 },
+                    ]
+                }
+            };
+
             _items["Wooden Pick"] =
             {
                 type: Game.ItemType.Pick,
@@ -72,8 +214,114 @@ OnSubmit.Using("Game", function (Game)
                         { item: _items["Stick"], amount: 2 },
                         { item: Game.Resources.get("Wood"), amount: 3 }
                     ]
-                },
+                }
             };
+
+            _items["Stone Pick"] =
+            {
+                type: Game.ItemType.Pick,
+                lootModifiers: {},
+                recipe:
+                {
+                    text: "Allows for gathering Iron and Copper ore.",
+                    unlockedBy: _items["Wooden Pick"],
+                    craftTime: 3,
+                    requirements:
+                    [
+                        { item: _items["Stick"], amount: 2 },
+                        { item: Game.Resources.get("Stone"), amount: 3 }
+                    ]
+                }
+            }
+
+            _improvePick(_items["Stone Pick"], _items["Wooden Pick"]);
+            _items["Stone Pick"].lootModifiers["Copper Ore"] = 1;
+            _items["Stone Pick"].lootModifiers["Iron Ore"] = 1;
+
+            _items["Cast Iron Pick"] =
+            {
+                type: Game.ItemType.Pick,
+                lootModifiers: {},
+                recipe:
+                {
+                    text: "Allows for gathering Gold and Tin ore.",
+                    unlockedBy: _items["Stone Pick"],
+                    craftTime: 3,
+                    requirements:
+                    [
+                        { item: _items["Stick"], amount: 2 },
+                        { item: _items["Iron Bar"], amount: 3 }
+                    ]
+                }
+            }
+
+            _improvePick(_items["Cast Iron Pick"], _items["Stone Pick"]);
+            _items["Cast Iron Pick"].lootModifiers["Tin Ore"] = 1;
+            _items["Cast Iron Pick"].lootModifiers["Gold Ore"] = 1;
+
+            _items["Gold Pick"] =
+            {
+                type: Game.ItemType.Pick,
+                lootModifiers: {},
+                recipe:
+                {
+                    text: "Allows for gathering Bauxite ore.",
+                    unlockedBy: _items["Cast Iron Pick"],
+                    craftTime: 3,
+                    requirements:
+                    [
+                        { item: _items["Stick"], amount: 2 },
+                        { item: _items["Gold Bar"], amount: 3 }
+                    ]
+                }
+            }
+
+            _improvePick(_items["Gold Pick"], _items["Cast Iron Pick"]);
+            _items["Gold Pick"].lootModifiers["Bauxite Ore"] = 1;
+
+            _items["Steel Pick"] =
+            {
+                type: Game.ItemType.Pick,
+                lootModifiers: {},
+                recipe:
+                {
+                    text: "Allows for gathering Lead ore.",
+                    unlockedBy: _items["Gold Pick"],
+                    craftTime: 12,
+                    requirements:
+                    [
+                        { item: _items["Stick"], amount: 2 },
+                        { item: _items["Steel Bar"], amount: 3 },
+                        { item: _items["Bronze Rivet"], amount: 4 },
+                        { item: _items["Aluminum Strips"], amount: 8 },
+                    ]
+                }
+            }
+
+            _improvePick(_items["Steel Pick"], _items["Gold Pick"]);
+            _items["Steel Pick"].lootModifiers["Lead Ore"] = 1;
+
+            _items["Copper Bar"].recipe.unlockedBy = _items["Stone Pick"];
+            _items["Iron Bar"].recipe.unlockedBy = _items["Stone Pick"];
+            _items["Tin Bar"].recipe.unlockedBy = _items["Cast Iron Pick"];
+            _items["Gold Bar"].recipe.unlockedBy = _items["Cast Iron Pick"];
+            _items["Steel Bar"].recipe.unlockedBy = _items["Gold Pick"];
+            _items["Bronze Bar"].recipe.unlockedBy = _items["Gold Pick"];
+            _items["Bronze Rivet"].recipe.unlockedBy = _items["Gold Pick"];
+            _items["Aluminum Bar"].recipe.unlockedBy = _items["Gold Pick"];
+            _items["Aluminum Strips"].recipe.unlockedBy = _items["Gold Pick"];
+            _items["Lead Bar"].recipe.unlockedBy = _items["Steel Pick"];
+        };
+
+        var _improvePick = function(newPick, oldPick)
+        {
+            newPick.level = oldPick.level + 1;
+            newPick.durability = oldPick.durability * 2;
+            newPick.maxDurability = newPick.durability;
+            for (var prop in oldPick.lootModifiers)
+            {
+                newPick.lootModifiers[prop] = oldPick.lootModifiers[prop];
+            }
         };
         
         var _determineUnlocks = function(item)
@@ -175,7 +423,8 @@ OnSubmit.Using("Game", function (Game)
                 var item = _items[prop];
                 item.name = prop;
                 item.id = item.name.replace(/ /g, '');
-                
+                item.image = 'images/' + item.id + '.png';
+
                 _determineUnlocks(item);
                 _determineTotalRequirements(item);
                 _determineSellValue(item);

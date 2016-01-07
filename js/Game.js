@@ -8,95 +8,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
         var _unlockedRecipeCategoryMap = {};
 
         _this.player = new Game.Player();
-        
         _this.difficultyColors = ['#555', '#00DD00', '#E6DE00', '#FF8E46'];
-
-        var _rand = function (min, max)
-        {
-            if (min && max)
-            {
-                return Math.random() * (max - min) + min;
-            }
-            
-            return Math.random();
-        }
-
-        var _gather = function ()
-        {
-            var drops = [];
-            var inventory = _this.player.inventory;
-            var pick = inventory.pick();
-            
-            var resources = Game.Resources.getAll();
-            for (var resourceName in resources)
-            {
-                var resource = resources[resourceName];
-                
-                // Stop processing items if the player's level is too low
-                if (resource.minLevel > _this.player.level)
-                {
-                    break;
-                }
-                
-                if (resourceName === "Wood")
-                {
-                    if (inventory.getItemAmount(resource) === 0)
-                    {
-                        // When player is out of wood, always drop at least 1
-                        drops.push({ item: resource, amount: Math.round(_rand(1, resource.maxDropAmount))});
-                    }
-                    else if (resource.dropChance > _rand())
-                    {
-                        drops.push({ item: resource, amount: Math.ceil(_rand() * resource.maxDropAmount)});
-                    }
-                }
-                else
-                {
-                    var lootModifier = pick ? (pick.lootModifiers[resource.name] ? pick.lootModifiers[resource.name] : lootModifier) : 0;
-                    if (lootModifier > 0 && resource.dropChance > _rand())
-                    {
-                        drops.push({ item: resource, amount: lootModifier * Math.ceil(_rand() * resource.maxDropAmount)});
-                    }
-                }
-            }
-            
-            var newPick = null;
-            if (pick)
-            {
-                var newDurability = pick.durability() - 1;
-                if (newDurability === 0)
-                {
-                    // The pick just broke.
-                    // Replace it with the highest level pick in the the player's inventory.
-                    newPick = this.player.inventory.getHighestLevelPick();
-
-                    if (newPick)
-                    {
-                        _this.player.inventory.replacePickFromInventory(newPick);
-                        // if (this.player.inventory.items[newPick.name].durabilities)
-                        // {
-                        //     this.player.inventory.pick.durability = this.player.inventory.items[newPick.name].durabilities.pop();
-                        // }
-                        // else
-                        // {
-                        //     this.player.inventory.pick.durability = newPick.maxDurability;
-                        // }
-                    }
-                    else
-                    {
-                        _this.player.inventory.removePick();
-                    }
-                }
-                else
-                {
-                    // The pick is not broken.
-                    pick.durability(newDurability);
-                }
-            }
-            
-            return drops;
-        };
-
         _this.strings = Strings.StringRepository.getStrings("str");
 
         _this.inventory =
@@ -151,7 +63,9 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
 
         _this.onlyShowCraftableRecipes = ko.observable();
         _this.recipeSearchTerm = ko.observable();
-        
+        _this.craftAmount = ko.observable(1);
+        _this.itemBeingCrafted = ko.observable();
+
         _this.selectedRecipe = 
         {
             item: ko.observable(),
@@ -187,16 +101,119 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
 
             _this.selectedRecipe.item(item);
         };
+
+        _this.allowCraft = ko.pureComputed(
+            function ()
+            {
+                return _this.selectedRecipe.item() && !_this.itemBeingCrafted();
+            });
+
+        _this.cancelCraft = function ()
+        {
+            var item = _this.itemBeingCrafted();
+            item.crafting(false);
+            _this.itemBeingCrafted(null);
+            item.$element.stop(true, true);
+        };
+
+        _this.craftAll = function ()
+        {
+            _craft(true);
+        }
         
         _this.craft = function ()
+        {
+            _craft(false);
+        };
+
+        var _rand = function (min, max)
+        {
+            if (min && max)
+            {
+                return Math.random() * (max - min) + min;
+            }
+            
+            return Math.random();
+        }
+
+        var _gather = function ()
+        {
+            var drops = [];
+            var inventory = _this.player.inventory;
+            var pick = inventory.pick();
+            
+            var resources = Game.Resources.getAll();
+            for (var resourceName in resources)
+            {
+                var resource = resources[resourceName];
+                
+                // Stop processing items if the player's level is too low
+                if (resource.minLevel > _this.player.level)
+                {
+                    break;
+                }
+                
+                if (resourceName === "Wood")
+                {
+                    if (inventory.getItemAmount(resource) === 0)
+                    {
+                        // When player is out of wood, always drop at least 1
+                        drops.push({ item: resource, amount: Math.round(_rand(1, resource.maxDropAmount))});
+                    }
+                    else if (resource.dropChance > _rand())
+                    {
+                        drops.push({ item: resource, amount: Math.ceil(_rand() * resource.maxDropAmount)});
+                    }
+                }
+                else
+                {
+                    var lootModifier = (pick && pick.lootModifiers[resource.name]) || 0;
+                    if (lootModifier > 0 && resource.dropChance > _rand())
+                    {
+                        drops.push({ item: resource, amount: lootModifier * Math.ceil(_rand() * resource.maxDropAmount)});
+                    }
+                }
+            }
+            
+            var newPick = null;
+            if (pick)
+            {
+                var newDurability = pick.durability() - 1;
+                if (newDurability === 0)
+                {
+                    // The pick just broke.
+                    // Replace it with the highest level pick in the the player's inventory.
+                    newPick = _this.player.inventory.getHighestLevelPick();
+
+                    if (newPick)
+                    {
+                        _this.player.inventory.replacePickFromInventory(newPick);
+                    }
+                    else
+                    {
+                        _this.player.inventory.removePick();
+                    }
+                }
+                else
+                {
+                    // The pick is not broken.
+                    pick.durability(newDurability);
+                }
+            }
+            
+            return drops;
+        };
+
+        var _craft = function (craftAsManyAsPossible)
         {
             var selectedItem = _this.selectedRecipe.item();
             if (!selectedItem)
             {
                 return;
             }
-            
-            var canCraft = _this.player.inventory.canCraft(selectedItem.recipe, 1);
+
+            var amount = (!craftAsManyAsPossible && parseInt(_this.craftAmount())) || 1;
+            var canCraft = _this.player.inventory.canCraft(selectedItem.recipe, amount);
             if (!canCraft)
             {
                 alert("Can't craft");
@@ -208,8 +225,12 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
             craftTime = (OnSubmit.slow ? craftTime * 10 : craftTime);
             
             selectedItem.crafting(true);
+            _this.itemBeingCrafted(selectedItem);
 
-            (function (item)
+            // Reset craft amount to 1
+            _this.craftAmount(1);
+
+            (function doCraft (item)
             {
                 var fullWidth = item.$element.width();
                 item.$element.width(0).animate(
@@ -218,9 +239,24 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                     "linear",
                     function ()
                     {
-                        item.crafting(false);
+                        if (!_this.itemBeingCrafted())
+                        {
+                            // Crafting was cancelled
+                            return;
+                        }
+
                         _this.player.craft(item);
                         _unlockNewRecipes(item);
+
+                        if (--amount || (craftAsManyAsPossible && _this.player.inventory.canCraft(selectedItem.recipe, 1)))
+                        {
+                            doCraft(item);
+                        }
+                        else
+                        {
+                            item.crafting(false);
+                            _this.itemBeingCrafted(null);
+                        }
                     });
             })(selectedItem);
         };
@@ -322,21 +358,15 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                     _unlockedRecipeCategoryMap[itemInnerScope.type] = category;
 
                     // Keep the observable array sorted
-                    var itemInserted = false;
-
-                    for (var i = 0, length = _this.recipeCategories.unlocked().length; !itemInserted && i < length; i++)
-                    {
-                        if (item.type > _this.recipeCategories.unlocked()[i].type)
+                    var unlocked = _this.recipeCategories.unlocked();
+                    unlocked.push(category);
+                    unlocked.sort(
+                        function (a, b)
                         {
-                            _this.recipeCategories.unlocked.splice(i, 0, category);
-                            itemInserted = true;
-                        }
-                    }
+                            return a.name > b.name ? 1 : -1;
+                        });
 
-                    if (!itemInserted)
-                    {
-                        _this.recipeCategories.unlocked.push(category);
-                    }
+                    _this.recipeCategories.unlocked(unlocked);
                 }
                 else
                 {
@@ -370,7 +400,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                         return ko.pureComputed(
                             function ()
                             {
-                                if (itemInnerScope.selected())
+                                if (itemInnerScope.selected() || itemInnerScope.crafting())
                                 {
                                     return '#fff';
                                 }
@@ -384,7 +414,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                         return ko.pureComputed(
                             function ()
                             {
-                                if (itemInnerScope.selected())
+                                if (itemInnerScope.selected() || itemInnerScope.crafting())
                                 {
                                     return _this.difficultyColors[itemInnerScope.recipe.difficulty()];
                                 }
@@ -454,7 +484,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                                 var rgb = 'rgb(' + red + ', ' + green + ', 0)';
                                 
                                 _this.durability.amount(newDurability);
-                                _this.durability.width(width);
+                                _this.durability.width(width + 'px');
                                 _this.durability.backgroundColor(rgb);
                             });
                     }
