@@ -11,10 +11,17 @@ OnSubmit.Using("Game", function (Game)
         
         _this.mergeItem = function(item, amount)
         {
-            if (_items[item.name])
+            var itemKey = item.name;
+            if (item.type === Game.ItemType.Pick)
             {
-                var currentAmount = _items[item.name].amount();
-                _items[item.name].amount(currentAmount + amount);
+                // Only picks of the same name and durability can stack
+                itemKey += ' (' + item.durability + ')';
+            }
+
+            if (_items[itemKey])
+            {
+                var currentAmount = _items[itemKey].amount();
+                _items[itemKey].amount(currentAmount + amount);
             }
             else
             {
@@ -88,6 +95,23 @@ OnSubmit.Using("Game", function (Game)
                 _this.removeItem(req.item, amount * req.amount);
             });
 
+            if (item.type === Game.ItemType.Pick)
+            {
+                var pick = _this.pick();
+                if (!pick || pick.level < item.level)
+                {
+                    if (pick)
+                    {
+                        // Auto equip new pick if it's higher level than the current one.
+                        // Place current pick back into inventory.
+                        _this.mergeItem(pick, 1);
+                    }
+
+                    _this.pick(new Game.Pick(item.name));
+                    return;
+                }
+            }
+
             _this.mergeItem(item, amount);
         };
         
@@ -132,7 +156,7 @@ OnSubmit.Using("Game", function (Game)
             
             for (var itemName in _items)
             {
-                var item = _items[itemName].Item;
+                var item = _items[itemName].item;
                 if (item.type && item.type == Game.ItemType.Pick && _items[itemName].amount > 0 && item.level > highestLevel)
                 {
                     pick = item;
@@ -154,20 +178,15 @@ OnSubmit.Using("Game", function (Game)
             _items[item.name] = newItem;
 
             // Keep the observable array sorted
-            var itemInserted = false;
-            for (var i = 0, length = _this.itemsArray().length; !itemInserted && i < length; i++)
-            {
-                if (item.name > _this.itemsArray()[i].name)
+            var items = _this.itemsArray();
+            items.push(newItem);
+            items.sort(
+                function (a, b)
                 {
-                    _this.itemsArray.splice(i, 0, newItem);
-                    itemInserted = true;
-                }
-            }
+                    return a.item.name > b.item.name ? 1 : -1;
+                });
 
-            if (!itemInserted)
-            {
-                _this.itemsArray.push(newItem);
-            }
+            _this.itemsArray(items);
         };
     };
 });
