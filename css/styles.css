@@ -17,20 +17,17 @@ div#container {
 }
 
 table#inventoryTable {
-  border: 1px solid black;
-  border-bottom: 0;
-  border-right: 0;
-
-  width: 200px;
   border-spacing: 0;
-  border-collapse: separate;
+  border-collapse: collapse;
   font-size: 1em;
+}
+
+table#inventoryTable tr {
+  border-bottom : 1px solid #ddd;
 }
 
 table#inventoryTable td, table#inventoryTable th {
   margin: 0;
-  border-bottom: 1px solid #000;
-  border-right: 1px solid #000;
   padding: 4px;
   white-space: nowrap;
 }
@@ -249,4 +246,25 @@ input#craftAmount {
 
 input#craft {
   width: 70px;
+}
+
+div#help {
+  margin-top: 20px;
+}
+
+div#help table {
+  font-size: 0.8em;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+div#help tr {
+  border-bottom : 1px solid #ddd;
+}
+
+div#help td.key {
+  text-align: right;
+  vertical-align: top;
+  font-weight: bold;
+  padding: 4px;
 }
