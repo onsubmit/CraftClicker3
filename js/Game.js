@@ -326,13 +326,13 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
 
                                     if (categoryContainsSearchTerm && !onlyShowCraftableRecipes)
                                     {
-                                        // The category contains the search term and the player wants to only show craftable recipes.
+                                        // The category contains the search term and the player wants to show all recipes.
                                         return true;
                                     }
                                 }
                                 else if (!onlyShowCraftableRecipes)
                                 {
-                                    // No search term was supplied and the player wants to show all recipes, craftable and uncraftable.
+                                    // No search term was supplied and the player wants to show all recipes.
                                     return true;
                                 }
 
@@ -340,7 +340,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                                 // Category isn't yet necessarily shown. Show it when either of the following occur:
                                 //
                                 //      1. If the player wants to only show craftable recipes, then show the category only if any of its recipes can be crafted and,
-                                //         if a search term was supplied, also contains it.
+                                //         if a search term was supplied, contains it as well.
                                 //
                                 //      2. If the player wants to show all recipes, then show the category if any of its recipes contains the search term.
                                 //
@@ -359,6 +359,10 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                                         }
                                     }
 
+                                    return false;
+                                }
+                                else
+                                {
                                     return false;
                                 }
 
@@ -451,26 +455,56 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                         return function (checkSearchTerm, checkForShownCategory)
                         {
                             var onlyShowCraftableRecipes = _this.onlyShowCraftableRecipes();
-                            var showItem = !onlyShowCraftableRecipes || _this.player.inventory.canCraft(itemInnerScope.recipe, 1);
 
-                            if (checkSearchTerm && showItem)
+                            if (checkSearchTerm)
                             {
                                 var searchTerm = _this.recipeSearchTerm();
+                                var containsSearchTerm = false;
                                 if (searchTerm)
                                 {
                                     searchTerm = searchTerm.toLowerCase();
+                                    containsSearchTerm = itemInnerScope.name.toLowerCase().indexOf(searchTerm) >= 0;
+                                }
 
-                                    // Show item if it contains the search term
-                                    showItem = itemInnerScope.name.toLowerCase().indexOf(searchTerm) >= 0;
+                                if (onlyShowCraftableRecipes)
+                                {
+                                    // The player only wants to see craftable recipes
+                                    var canCraft = _this.player.inventory.canCraft(itemInnerScope.recipe, 1);
+                                    if (!canCraft)
+                                    {
+                                        // Item can't be crafted, don't show it.
+                                        return false;
+                                    }
+
+                                    if (containsSearchTerm || !searchTerm)
+                                    {
+                                        // Item can be crafted and either contains the search term or none was suplied.
+                                        return true;
+                                    }
+                                    else
+                                    {
+                                        return (itemInnerScope.type.toLowerCase().indexOf(searchTerm) >= 0);
+                                    }
+                                }
+                                else if (containsSearchTerm || !searchTerm)
+                                {
+                                    // Player wants to see all recipes, and the item either contains the search term or none was suplied.
+                                    return true;
+                                }
+                                else if (checkForShownCategory)
+                                {
+                                    // A recipe can still be displayed if its category contains the search term.
+                                    return (itemInnerScope.type.toLowerCase().indexOf(searchTerm) >= 0);
                                 }
                             }
-
-                            if (checkForShownCategory)
+                            else if (onlyShowCraftableRecipes)
                             {
-                                showItem = _unlockedRecipeCategoryMap[itemInnerScope.type].shown(false);
+                                // 'checkSearchTerm' is only ever false when we already know the items category contains the search term.
+                                // The player only wants to see craftable recipes, so display this recipe only if its craftable.
+                                return _this.player.inventory.canCraft(itemInnerScope.recipe, 1);
                             }
 
-                            return showItem;
+                            return false;
                         }
                     })(item);
 
@@ -482,6 +516,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                                 // Recalculate whenever the inventory changes.
                                 _this.player.inventory.isDirty();
                                 
+                                var onlyShowCraftableRecipes = _this.onlyShowCraftableRecipes();
                                 return itemInnerScope.shown(true, true);
                             });
                     })(item);
