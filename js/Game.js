@@ -63,7 +63,17 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
 
         _this.onlyShowCraftableRecipes = ko.observable();
         _this.recipeSearchTerm = ko.observable();
-        _this.craftAmount = ko.observable(1);
+
+        _this.craftAmount =
+        {
+            value: ko.observable(1),
+            onFocus: function (data, event)
+            {
+                var target = event.target || event.srcElement;
+                target.select();
+            }
+        };
+
         _this.itemBeingCrafted = ko.observable();
 
         _this.selectedRecipe = 
@@ -105,7 +115,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
         _this.allowCraft = ko.pureComputed(
             function ()
             {
-                return _this.selectedRecipe.item() && !_this.itemBeingCrafted();
+                return _this.selectedRecipe.item();
             });
 
         _this.cancelCraft = function ()
@@ -212,7 +222,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                 return;
             }
 
-            var amount = (!craftAsManyAsPossible && parseInt(_this.craftAmount())) || 1;
+            var amount = (!craftAsManyAsPossible && parseInt(_this.craftAmount.value())) || 1;
             var canCraft = _this.player.inventory.canCraft(selectedItem.recipe, amount);
             if (!canCraft)
             {
@@ -227,11 +237,14 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
             selectedItem.crafting(true);
             _this.itemBeingCrafted(selectedItem);
 
-            // Reset craft amount to 1
-            _this.craftAmount(1);
-
+            var counter = 0;
             (function doCraft (item)
             {
+                if (craftAsManyAsPossible)
+                {
+                    _this.craftAmount.value(counter++);
+                }
+
                 var fullWidth = item.$element.width();
                 item.$element.width(0).animate(
                     { width: fullWidth },
@@ -242,20 +255,28 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                         if (!_this.itemBeingCrafted())
                         {
                             // Crafting was cancelled
+                            // Reset craft amount to 1
+                            _this.craftAmount.value(1);
                             return;
                         }
 
                         _this.player.craft(item);
                         _unlockNewRecipes(item);
 
-                        if (--amount || (craftAsManyAsPossible && _this.player.inventory.canCraft(selectedItem.recipe, 1)))
+                        if (--amount > 0 || (craftAsManyAsPossible && _this.player.inventory.canCraft(selectedItem.recipe, 1)))
                         {
+                            if (!craftAsManyAsPossible)
+                            {
+                                _this.craftAmount.value(amount);
+                            }
+
                             doCraft(item);
                         }
                         else
                         {
                             item.crafting(false);
                             _this.itemBeingCrafted(null);
+                            _this.craftAmount.value(1);
                         }
                     });
             })(selectedItem);
@@ -487,6 +508,8 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                                 _this.durability.width(width + 'px');
                                 _this.durability.backgroundColor(rgb);
                             });
+
+                        newPick.durability.valueHasMutated();
                     }
                 });
 
@@ -515,6 +538,42 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                         category.filteredOut(!showAllCategories && category.name !== selectedCategory.name);
                     });
                 });
+
+            $(document).keypress(function(e)
+            {
+                var target = e.target || e.srcElement;
+                if (target.tagName.toLowerCase() === 'input')
+                {
+                    return;
+                }
+
+                e.preventDefault(); // Prevent page down on hitting space bar
+                if (e.which === 32) // space
+                {
+                    if (_this.itemBeingCrafted())
+                    {
+                        _this.cancelCraft();
+                    }
+                    else
+                    {
+                        _this.craft();
+                    }
+                }
+                else if (e.which  == 65 || e.which == 97) // '[Aa]'
+                {
+                    _this.craftAll();
+                }
+                else if (e.which == 71 || e.which == 103) // '[Gg]'
+                {
+                    _this.step();
+                }
+                else if (e.which >= 49 && e.which <= 57) // '[1-9]'
+                {
+                    var amount = e.which - 48;
+                    _this.craftAmount.value(amount);
+                    _craft(false);
+                }
+            });
         })();
     };
 
@@ -522,5 +581,8 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
         function ()
         {
             ko.applyBindings(new Game.ViewModel());
+
+            // Select the first recipe by default
+            $('.recipeCategory li').first().click();
         });
 });

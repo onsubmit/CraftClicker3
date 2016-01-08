@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <title>CraftClicker 3.03 beta</title>
     <script src="js/Core/knockout-3.3.0.debug.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="js/Core/KnockoutExtensions.js"></script>
@@ -60,7 +61,7 @@
                     <li data-bind="
                         click: $root.selectRecipe,
                         visible: item.visible,
-                        event: { 'dblclick': $root.allowCraft() && $root.craft },
+                        event: { 'dblclick': !$root.itemBeingCrafted() && $root.craft },
                         style:
                         {
                             color: item.recipe.color,
@@ -97,10 +98,10 @@
                 </div>
             </div>
             <div id="actions">
-                <input id="craftAll" type="button" data-bind="click: craftAll, value: strings['CraftAll'], enable: allowCraft" />
-                <input id="craftAmount" value="1" data-bind="numeric, textInput: craftAmount" />
-                <input id="craft" type="button" data-bind="click: craft, value: strings['Craft'], visible: allowCraft" />
-                <input id="cancel" type="button" data-bind="click: cancelCraft, value: strings['Cancel'], visible: !allowCraft()" />
+                <input id="craftAll" type="button" data-bind="click: craftAll, value: strings['CraftAll'], enable: !itemBeingCrafted()" />
+                <input id="craftAmount" value="1" data-bind="numeric, textInput: craftAmount.value, enable: !itemBeingCrafted(), event: { 'focus': craftAmount.onFocus }" />
+                <input id="craft" type="button" data-bind="click: craft, value: strings['Craft'], visible: !itemBeingCrafted()" />
+                <input id="cancel" type="button" data-bind="click: cancelCraft, value: strings['Cancel'], visible: itemBeingCrafted" />
             </div>
         </div>
         <div id="inventory">
@@ -115,10 +116,33 @@
             </table>
             <script type="text/html" id="inventory-template">
                 <tr>
-                    <td data-bind="text: item.name"></td>
+                    <td data-bind="text: toString"></td>
                     <td data-bind="text: amount"></td>
                 </tr>
             </script>
+        </div>
+        <div id="help">
+            <h4>Shortcuts</h4>
+            <table>
+                <tbody>
+                    <tr>
+                        <td class="key">g</td>
+                        <td>Gather resources</td>
+                    </tr>
+                    <tr>
+                        <td class="key">[Space]</td>
+                        <td>Craft selected recipe (or cancel if crafting)</td>
+                    </tr>
+                    <tr>
+                        <td class="key">a</td>
+                        <td>Craft all of selected recipe</td>
+                    </tr>
+                    <tr>
+                        <td class="key">1-9</td>
+                        <td>Craft <i>n</i> of selected</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
   </body>

@@ -6,6 +6,7 @@ OnSubmit.Using("Game", function (Game)
         var _item = Game.Items.get(pickName);
 
         _this.name = _item.name;
+        _this.type = _item.type;
         _this.image = _item.image;
         _this.level = _item.level;
         _this.durability = ko.observable(_item.durability);
