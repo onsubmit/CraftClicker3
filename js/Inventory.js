@@ -7,6 +7,7 @@ OnSubmit.Using("Game", function (Game)
         
         _this.itemsArray = ko.observableArray([]);
         _this.pick = ko.observable();
+        _this.forge = ko.observable();
         _this.isDirty = ko.observable(false);
         
         _this.mergeItem = function(item, amount)
@@ -111,7 +112,7 @@ OnSubmit.Using("Game", function (Game)
             }
             else
             {
-                _this.mergeItem(item, amount);
+                _this.mergeItem(item, amount * item.recipe.makes);
             }
         };
         
@@ -192,16 +193,7 @@ OnSubmit.Using("Game", function (Game)
         var _setItemAmount = function (item, amount)
         {
             var itemKey = _getItemKey(item);
-
-            if (amount === 0)
-            {
-                _this.itemsArray.remove(function (entry) { return entry.item === item; } );
-                delete _items[itemKey];
-            }
-            else
-            {
-                _items[itemKey].amount(amount);
-            }
+            _items[itemKey].amount(amount);
         };
 
         var _addNewItem = function (item, itemKey, amount)

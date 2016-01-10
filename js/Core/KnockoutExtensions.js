@@ -22,3 +22,32 @@ ko.bindingHandlers.numeric =
         });
     }
 };
+
+ko.bindingHandlers.htmlWithBindings =
+{
+    init: function ()
+    {
+        return { controlsDescendantBindings: true };
+    },
+    update: function (element, valueAccessor, allBindings, viewModel, bindingContext)
+    {
+        ko.utils.setHtml(element, valueAccessor());
+
+        var childBindings = allBindings.get("childBindings");
+        if (childBindings)
+        {
+            for (var selector in childBindings)
+            {
+                var child = $(element).children(selector)[0];
+                if (child)
+                {
+                    ko.applyBindingsToNode(child, childBindings[selector], bindingContext);
+                }
+            }
+        }
+        else
+        {
+            ko.applyBindingsToDescendants(bindingContext, element);
+        }
+    }
+};
