@@ -159,17 +159,16 @@ OnSubmit.Using("Game", function (Game)
             for (var itemName in _items)
             {
                 var item = _items[itemName].item;
-                if (item.type && item.type == Game.ItemType.Pick && _this.getItemAmount(item) > 0 && item.level > highestLevel)
+                if (item.type && item.type == Game.ItemType.Pick && _this.getItemAmount(item) > 0 && item.level >= highestLevel)
                 {
-                    highestLevel = item.level;
-
                     var durability = item.durability();
-                    if (lowestDurability < 0 || durability < lowestDurability)
+                    if (lowestDurability < 0 || item.level > highestLevel || (item.level === highestLevel && durability < lowestDurability))
                     {
                         // Return the pick of highest level.
                         // If there are multiple, choose the one with the lowest durability so it can be removed more quickly.
                         // Otherwise, as long as the player has unused picks in their inventory, the partially used ones will never be removed.
                         pick = item;
+                        highestLevel = item.level;
                         lowestDurability = durability;
                     }
                 }
