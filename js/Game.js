@@ -22,25 +22,61 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
             unlocked: ko.observableArray([])
         };
 
-        _this.durability =
+        _this.pick =
         {
-            amount: ko.observable(),
-            width: ko.observable(),
-            backgroundColor: ko.observable(),
-            visible: ko.pureComputed(
+            durability:
+            {
+                amount: ko.observable(),
+                width: ko.observable(),
+                backgroundColor: ko.observable(),
+                visible: ko.pureComputed(
+                    function ()
+                    {
+                        var pick = _this.player.inventory.pick();
+                        return pick && _this.pick.durability.amount() !== pick.maxDurability; 
+                    })
+            },
+            image: ko.pureComputed(
                 function ()
                 {
                     var pick = _this.player.inventory.pick();
-                    return pick && _this.durability.amount() !== pick.maxDurability; 
+                    return pick ? pick.image : 'images/pick-disabled.png';
+                }),
+            name: ko.pureComputed(
+                function ()
+                {
+                    var pick = _this.player.inventory.pick();
+                    return pick ? pick.name : _this.strings["NoPick"];
                 })
         };
 
-        _this.pickImage = ko.pureComputed(
-            function ()
+        _this.forge =
+        {
+            durability:
             {
-                var pick = _this.player.inventory.pick();
-                return pick ? pick.image : 'images/pick-disabled.png';
-            });
+                amount: ko.observable(),
+                width: ko.observable(),
+                backgroundColor: ko.observable(),
+                visible: ko.pureComputed(
+                    function ()
+                    {
+                        var pick = _this.player.inventory.forge();
+                        return pick && _this.forge.durability.amount() !== forge.maxDurability; 
+                    })
+            },
+            image: ko.pureComputed(
+                function ()
+                {
+                    var forge = _this.player.inventory.forge();
+                    return forge ? forge.image : 'images/forge-disabled.png';
+                }),
+            name: ko.pureComputed(
+                function ()
+                {
+                    var forge = _this.player.inventory.forge();
+                    return forge ? forge.name : _this.strings["NoForge"];
+                })
+        };
 
         _this.gatherText = ko.pureComputed(
             function ()
@@ -91,25 +127,82 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                     var stringId = craftTimeInSeconds === 1 ? "CraftTime" : "CraftTimePlural";
                     return Helpers.String.format(_this.strings[stringId], _this.selectedRecipe.item().recipe.craftTime);
                 }),
+            unlocks: ko.pureComputed(
+                function ()
+                {
+                    var unlocks = _this.selectedRecipe.item().unlocks;
+                    if (unlocks)
+                    {
+                        var list = _this.strings.makeListString(unlocks)
+                        return Helpers.String.format(_this.strings["Unlocks"], list);
+                    }
+
+                    return "";
+                }),
+            description: ko.pureComputed(
+                function ()
+                {
+                    return _this.selectedRecipe.item().recipe.text;
+                }),
+            sellsFor: ko.pureComputed(
+                function ()
+                {
+                    var sellsFor = _this.strings.makeMoneyString(_this.selectedRecipe.item().sellValue);
+                    return Helpers.String.format(_this.strings["SellsFor"], sellsFor);
+                }),
+            requiredForge:
+            {
+                item: function ()
+                {
+                    return _this.selectedRecipe.item().recipe.forge;
+                },
+                name: ko.pureComputed(
+                    function ()
+                    {
+                        var forge = _this.selectedRecipe.item().recipe.forge;
+                        if (forge)
+                        {
+                            return Helpers.String.format(_this.strings["RequiresForge"], forge.name);
+                        }
+
+                        return null;
+                    }),
+                isMissing: ko.pureComputed(
+                    function ()
+                    {
+                        var forge = _this.selectedRecipe.item().recipe.forge;
+                        if (forge)
+                        {
+                            var playerForge = _this.player.inventory.forge();
+                            return (playerForge && playerForge.level >= forge.level);
+                        }
+
+                        return false;
+                    })
+            },
             requirements: ko.observableArray([])
         }
         
         _this.selectRecipe = function (item, event)
         {
-            var selectedItem = _this.selectedRecipe.item();
-            if (selectedItem)
-            {
-                selectedItem.selected(false);
-            }
-            
-            item.selected(true);
-            
             if (!item.$element)
             {
+                // Store a reference to the element.
+                // It is used only during setup and cancellation of the crafting animation.
                 item.$element = $(event.currentTarget || event.srcElement);
             }
 
-            _this.selectedRecipe.item(item);
+            item.selected(true);
+        };
+
+        _this.selectRecipeByRequirement = function(requirement)
+        {
+            requirement.item.selected(true);
+        };
+
+        _this.selectRecipeByForge = function(forge)
+        {
+            forge.requiredForge.item().selected(true);
         };
 
         _this.allowCraft = ko.pureComputed(
@@ -227,6 +320,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
             if (!canCraft)
             {
                 alert("Can't craft");
+                _this.craftAmount.value(1);
                 return;
             }
             
@@ -399,7 +493,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                 }
             })(item);
         };
-        
+
         (function _initialize()
         {
             // Stick is the only initially unlocked recipe.
@@ -450,6 +544,27 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
 
                     item.selected = ko.observable(false);
                     item.crafting = ko.observable(false);
+                    (function (itemInnerScope)
+                    {
+                        itemInnerScope.selected.subscribe(function (newValue)
+                            {
+                                if (newValue)
+                                {
+                                    var selectedItem = _this.selectedRecipe.item();
+
+                                    if (!selectedItem)
+                                    {
+                                        _this.selectedRecipe.item(itemInnerScope);
+                                    }
+                                    else if (selectedItem !== itemInnerScope)
+                                    {
+                                        selectedItem.selected(false);
+                                        _this.selectedRecipe.item(itemInnerScope);
+                                    }
+                                }
+                            });
+                    })(item);
+
                     item.shown = (function (itemInnerScope)
                     {
                         return function (checkSearchTerm, checkForShownCategory)
@@ -515,8 +630,6 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                             {
                                 // Recalculate whenever the inventory changes.
                                 _this.player.inventory.isDirty();
-                                
-                                var onlyShowCraftableRecipes = _this.onlyShowCraftableRecipes();
                                 return itemInnerScope.shown(true, true);
                             });
                     })(item);
@@ -539,9 +652,9 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                                 var green = Math.floor(192 * (width / maxWidth));
                                 var rgb = 'rgb(' + red + ', ' + green + ', 0)';
                                 
-                                _this.durability.amount(newDurability);
-                                _this.durability.width(width + 'px');
-                                _this.durability.backgroundColor(rgb);
+                                _this.pick.durability.amount(newDurability);
+                                _this.pick.durability.width(width + 'px');
+                                _this.pick.durability.backgroundColor(rgb);
                             });
 
                         newPick.durability.valueHasMutated();
@@ -556,7 +669,14 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                     {
                         if (!requirement.currentInventory)
                         {
-                            requirement.currentInventory = _this.player.inventory.getItemAmountObservable(requirement.item);
+                            requirement.currentInventory = (function (item)
+                                {
+                                    return ko.pureComputed(
+                                        function ()
+                                        {
+                                            return _this.player.inventory.getItemAmountObservable(item)();
+                                        });
+                                })(requirement.item);
                         }
                     });
 
@@ -604,9 +724,12 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                 }
                 else if (e.which >= 49 && e.which <= 57) // '[1-9]'
                 {
-                    var amount = e.which - 48;
-                    _this.craftAmount.value(amount);
-                    _craft(false);
+                    if (!_this.itemBeingCrafted())
+                    {
+                        var amount = e.which - 48;
+                        _this.craftAmount.value(amount);
+                        _craft(false);
+                    }
                 }
             });
         })();

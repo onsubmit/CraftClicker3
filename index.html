@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>CraftClicker 3.03 beta</title>
+    <title>CraftClicker 3.04 beta</title>
     <script src="js/Core/knockout-3.3.0.debug.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="js/Core/KnockoutExtensions.js"></script>
@@ -20,14 +20,34 @@
   </head>
   <body>
     <div id="container">
+        <div id="equipment">
+            <table id="equipmentTable">
+                <tr>
+                    <td>
+                        <div id="pickContainer">
+                            <img data-bind="click: step, attr: { alt: pick.name, title: pick.name, src: pick.image }" />
+                            <div class="durabilityContainer" data-bind="visible: pick.durability.visible">
+                                <div class="durability" data-bind="style: { width:  pick.durability.width, 'background-color':  pick.durability.backgroundColor }"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div id="forgeContainer">
+                            <img data-bind="attr: { alt: forge.name, title: forge.name, src: forge.image }" />
+                            <div class="durabilityContainer" data-bind="visible: forge.durability.visible">
+                                <div class="durability" data-bind="style: { width: forge.durability.width, 'background-color': forge.durability.backgroundColor }"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
         <div id="gatherActions">
-            <div>
-                <div id="gatherContainer">
-                    <img data-bind="click: step, attr: { alt: strings['Gather'], title: strings['Gather'], src: pickImage }" />
-                    <div id="durability" data-bind="visible: durability.visible, style: { width: durability.width, 'background-color': durability.backgroundColor }"></div>
-                </div>
-            </div>
-            <div><button id="gather" data-bind="click: step, text: gatherText"></button></div>
+            <button id="gather" data-bind="click: step, text: gatherText"></button>
         </div>
         <div id="recipes">
             <div id="experience" class="smallBar">
@@ -83,6 +103,21 @@
                 <div id="recipeRequirements" data-bind="with: selectedRecipe">
                     <h1 id="recipeName" data-bind="text: name"></h1>
                     <h4 id="craftTime" data-bind="text: craftTime"></h4>
+                    <p class="recipeUnlocks" data-bind="text: unlocks"></p>
+                    <p class="recipeDesc" data-bind="visible: description, text: description"></p>
+                    <p class="recipeSellsFor" data-bind="text: sellsFor">Sells for 2c</p>
+                    <p id="requiresForge" class="missing" data-bind="
+                        visible: requiredForge.name,
+                        htmlWithBindings: requiredForge.name,
+                        childBindings:
+                        {
+                            '.requiredForge':
+                            {
+                                click: $root.selectRecipeByForge,
+                                css: { 'missing': requiredForge.isMissing }
+                            }
+                        }">
+                    </p>
                     <table id="recipeRequirementList">
                         <tbody data-bind="template: { name: 'recipe-requirement-template', foreach: requirements, as: 'requirement' }"></tbody>
                     </table>
@@ -90,8 +125,9 @@
                         <tr>
                             <td class="alignRight" data-bind="text: requirement.amount"></td>
                             <td>
-                                <span data-bind="text: requirement.item.name"></span>
-                                (<span class="amount" data-bind="text: requirement.currentInventory"></span>)
+                                <a href="#" data-bind="visible: requirement.item.recipe, text: requirement.item.name, click: $root.selectRecipeByRequirement"></a>
+                                <span data-bind="visible: !requirement.item.recipe, text: requirement.item.name"></span>
+                                (<span class="amount" data-bind="text: requirement.currentInventory() || 0"></span>)
                             </td>
                         </tr>
                     </script>
@@ -115,7 +151,7 @@
                 <tbody data-bind="template: { name: 'inventory-template', foreach: player.inventory.itemsArray, as: 'item' }"></tbody>
             </table>
             <script type="text/html" id="inventory-template">
-                <tr>
+                <tr data-bind="if: amount">
                     <td data-bind="text: toString"></td>
                     <td data-bind="text: amount"></td>
                 </tr>
