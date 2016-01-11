@@ -26,7 +26,7 @@ OnSubmit.Using("Game", function (Game)
 
         _this.craft = function (item)
         {
-            _this.inventory.craft(item);
+            return _this.inventory.craft(item);
 
             /*
             // Consume the resources from the inventory.
