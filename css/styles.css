@@ -6,33 +6,40 @@ body {
   padding: 0;
 }
 
+input {
+  font-family: georgia, arial, helvetica, sans-serif;
+}
+
 h1, h2, h3, h4, h5, h6, p {
   padding: 0;
   margin: 0 0 6px 0;
 }
 
 div#container {
-  min-width: 550px;
   margin: 10px;
 }
 
 table#equipmentTable {
-
+  margin-bottom: 6px;
 }
 
 table#equipmentTable td {
   width: 40px;
   height: 40px;
-  border: 2px inset #fff;
-  background: url('../images/bg.png');
+  border: 2px inset rgba(192, 192, 192, 0.5);
   margin: 0;
-  padding: 0;
+  padding: 1px;
+}
+
+div#inventory {
+  margin-left: 300px;
 }
 
 table#inventoryTable {
   border-spacing: 0;
   border-collapse: collapse;
   font-size: 1em;
+  width: 200px;
 }
 
 table#inventoryTable tr {
@@ -43,6 +50,7 @@ table#inventoryTable td, table#inventoryTable th {
   margin: 0;
   padding: 4px;
   white-space: nowrap;
+  text-align: left;
 }
 
 div#recipeFilters {
@@ -56,7 +64,9 @@ input#recipeSearch {
   color: #aaa;
   background-color: rgba(0, 0, 0, 0.5);
   border: 1px inset #666;
+  margin-top: 4px;
   width: 100%;
+  padding-left: 2px;
 }
 
 select#recipeCategoryFilter {
@@ -72,13 +82,32 @@ select#recipeCategoryFilter option {
   background-color: #111;
 }
 
-input#haveResources {
+div#inventoryFilters {
+  padding: 4px;
+  font-size: 1em;
+}
+
+input#inventorySearch {
+  height: 1.4em;
+  border: 0;
+  border: 1px inset #ddd;
+  margin-top: 4px;
+  margin-bottom: 10px;
+  width: 200px;
+  padding-left: 2px;
+}
+
+select#inventorySortBy {
+  font-family: georgia, arial, helvetica, sans-serif;
+  height: 1.4em;
+  border: 1px inset #666;
+}
+
+input[type='checkbox'] {
   vertical-align: bottom;
 }
 
 div#recipes {
-  float: left;
-  margin: 0 30px 30px 0;
   width: 290px;
   border: 1px solid #999;
   background: url('../images/bg.png');
@@ -311,4 +340,8 @@ div#help td.key {
   vertical-align: top;
   font-weight: bold;
   padding: 4px;
+}
+
+.floatLeft {
+  float: left;
 }

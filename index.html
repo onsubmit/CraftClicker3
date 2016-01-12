@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>CraftClicker 3.05 beta</title>
+    <title>CraftClicker 3.06 beta</title>
     <script src="js/Core/knockout-3.3.0.debug.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="js/Core/KnockoutExtensions.js"></script>
@@ -21,165 +21,181 @@
   </head>
   <body>
     <div id="container">
-        <div id="equipment">
-            <table id="equipmentTable">
-                <tr>
-                    <td>
-                        <div class="equipmentContainer">
-                            <img data-bind="click: step, attr: { alt: pick.name, title: pick.name, src: pick.image }" />
-                            <div class="durabilityContainer" data-bind="visible: pick.durability.visible">
-                                <div class="durability" data-bind="style: { width:  pick.durability.width, 'background-color':  pick.durability.backgroundColor }"></div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="equipmentContainer">
-                            <img data-bind="attr: { alt: forge.name, title: forge.name, src: forge.image }" />
-                            <div class="durabilityContainer" data-bind="visible: forge.durability.visible">
-                                <div class="durability" data-bind="style: { width: forge.durability.width, 'background-color': forge.durability.backgroundColor }"></div>
-                            </div>
-                        </div>
-                    </td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-            </table>
-        </div>
-        <div id="gatherActions">
-            <button id="gather" data-bind="click: step, text: gatherText"></button>
-        </div>
-        <div id="recipes">
-            <div id="experience" class="smallBar">
-                <div id="experienceBar" class="smallBar">
-                    <div id="experienceBarText" class="smallBar smallBarText"></div>
-                </div>
+        <div class="floatLeft">
+            <div id="gatherActions">
+                <button id="gather" data-bind="click: step, text: gatherText"></button>
             </div>
-            <div id="money"></div>
-            <div id="recipeFilters">
-                <select id="recipeCategoryFilter" data-bind="
-                    options: recipeCategories.unlocked,
-                    optionsText: 'name',
-                    value: recipeCategories.selection,
-                    optionsCaption: strings['AllCategories']">
-                </select>
-                <label>
-                    <input id="haveResources" type="checkbox" data-bind="checked: onlyShowCraftableRecipes" />
-                    <span data-bind="text: strings['HaveResources']"></span>
-                </label>
-                <input id="recipeSearch" data-bind="textInput: recipeSearchTerm" />
-            </div>
-            <div id="recipeScroll">
-                <ul id="recipeCategories" data-bind="template: { name: 'recipe-category-template', foreach: recipeCategories.unlocked, as: 'category' }"></ul>
-                <script type="text/html" id="recipe-category-template">
-                    <li data-bind="visible: category.visible">
-                        <span data-bind="text: category.name"></span>
-                        <ul class="recipeCategory" data-bind="template: { name: 'recipe-item-template', foreach: category.items, as: 'item' }"></ul>
-                    </li>
-                </script>
-                <script type="text/html" id="recipe-item-template">
-                    <li data-bind="
-                        click: $root.selectRecipe,
-                        visible: item.visible,
-                        event: { 'dblclick': !$root.itemBeingCrafted() && $root.craft },
-                        style:
-                        {
-                            color: item.recipe.color,
-                            'background-color': item.recipe.backgroundColor
-                        },
-                        css:
-                        {
-                            'selectedRecipe': item.selected,
-                            'craftingRecipe': item.crafting
-                        }">
-
-                        <div class="recipeName">
-                            <span data-bind="text: item.name"></span>
-                        </div>
-                    </li>
-                </script>
-            </div>
-            <div id="recipeRequirementsScroll" data-bind="if: selectedRecipe.item">
-                <div id="recipeRequirements" data-bind="with: selectedRecipe">
-                    <h1 id="recipeName" data-bind="text: name"></h1>
-                    <h4 id="craftTime" data-bind="text: craftTime"></h4>
-                    <p class="recipeUnlocks" data-bind="text: unlocks"></p>
-                    <p class="recipeDesc" data-bind="visible: description, text: description"></p>
-                    <p class="recipeSellsFor" data-bind="text: sellsFor">Sells for 2c</p>
-                    <p id="requiresForge" class="missing" data-bind="
-                        visible: requiredForge.name,
-                        htmlWithBindings: requiredForge.name,
-                        childBindings:
-                        {
-                            '.requiredForge':
-                            {
-                                click: $root.selectRecipeByForge,
-                                css: { 'missing': requiredForge.isMissing }
-                            }
-                        }">
-                    </p>
-                    <table id="recipeRequirementList">
-                        <tbody data-bind="template: { name: 'recipe-requirement-template', foreach: requirements, as: 'requirement' }"></tbody>
-                    </table>
-                    <script type="text/html" id="recipe-requirement-template">
+            <div id="recipes">
+                <div id="equipment">
+                    <table id="equipmentTable">
                         <tr>
-                            <td class="alignRight" data-bind="text: requirement.amount"></td>
                             <td>
-                                <a href="#" data-bind="visible: requirement.item.recipe, text: requirement.item.name, click: $root.selectRecipeByRequirement"></a>
-                                <span data-bind="visible: !requirement.item.recipe, text: requirement.item.name"></span>
-                                (<span class="amount" data-bind="text: requirement.currentInventory() || 0"></span>)
+                                <div class="equipmentContainer">
+                                    <img data-bind="click: step, attr: { alt: pick.name, title: pick.name, src: pick.image }" />
+                                    <div class="durabilityContainer" data-bind="visible: pick.durability.visible">
+                                        <div class="durability" data-bind="style: { width:  pick.durability.width, 'background-color':  pick.durability.backgroundColor }"></div>
+                                    </div>
+                                </div>
                             </td>
+                            <td>
+                                <div class="equipmentContainer">
+                                    <img data-bind="attr: { alt: forge.name, title: forge.name, src: forge.image }" />
+                                    <div class="durabilityContainer" data-bind="visible: forge.durability.visible">
+                                        <div class="durability" data-bind="style: { width: forge.durability.width, 'background-color': forge.durability.backgroundColor }"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
                         </tr>
+                    </table>
+                </div>
+                <div id="experience" class="smallBar">
+                    <div id="experienceBar" class="smallBar">
+                        <div id="experienceBarText" class="smallBar smallBarText"></div>
+                    </div>
+                </div>
+                <div id="money"></div>
+                <div id="recipeFilters">
+                    <select id="recipeCategoryFilter" data-bind="
+                        options: recipeCategories.unlocked,
+                        optionsText: 'name',
+                        value: recipeCategories.selection,
+                        optionsCaption: strings['AllCategories']">
+                    </select>
+                    <label>
+                        <input id="haveResources" type="checkbox" data-bind="checked: onlyShowCraftableRecipes" />
+                        <span data-bind="text: strings['HaveResources']"></span>
+                    </label>
+                    <input id="recipeSearch" data-bind="textInput: recipeSearchTerm, attr: { 'placeholder': strings['Search'] }" />
+                </div>
+                <div id="recipeScroll">
+                    <ul id="recipeCategories" data-bind="template: { name: 'recipe-category-template', foreach: recipeCategories.unlocked, as: 'category' }"></ul>
+                    <script type="text/html" id="recipe-category-template">
+                        <li data-bind="visible: category.visible">
+                            <span data-bind="text: category.name"></span>
+                            <ul class="recipeCategory" data-bind="template: { name: 'recipe-item-template', foreach: category.items, as: 'item' }"></ul>
+                        </li>
+                    </script>
+                    <script type="text/html" id="recipe-item-template">
+                        <li data-bind="
+                            click: $root.selectRecipe,
+                            visible: item.visible,
+                            event: { 'dblclick': !$root.itemBeingCrafted() && $root.craft },
+                            style:
+                            {
+                                color: item.recipe.color,
+                                'background-color': item.recipe.backgroundColor
+                            },
+                            css:
+                            {
+                                'selectedRecipe': item.selected,
+                                'craftingRecipe': item.crafting
+                            }">
+
+                            <div class="recipeName">
+                                <span data-bind="text: item.name"></span>
+                            </div>
+                        </li>
                     </script>
                 </div>
+                <div id="recipeRequirementsScroll" data-bind="if: selectedRecipe.item">
+                    <div id="recipeRequirements" data-bind="with: selectedRecipe">
+                        <h1 id="recipeName" data-bind="text: name"></h1>
+                        <h4 id="craftTime" data-bind="text: craftTime"></h4>
+                        <p class="recipeUnlocks" data-bind="text: unlocks"></p>
+                        <p class="recipeDesc" data-bind="visible: description, text: description"></p>
+                        <p class="recipeSellsFor" data-bind="text: sellsFor">Sells for 2c</p>
+                        <p id="requiresForge" class="missing" data-bind="
+                            visible: requiredForge.name,
+                            htmlWithBindings: requiredForge.name,
+                            childBindings:
+                            {
+                                '.requiredForge':
+                                {
+                                    click: $root.selectRecipeByForge,
+                                    css: { 'missing': requiredForge.isMissing }
+                                }
+                            }">
+                        </p>
+                        <table id="recipeRequirementList">
+                            <tbody data-bind="template: { name: 'recipe-requirement-template', foreach: requirements, as: 'requirement' }"></tbody>
+                        </table>
+                        <script type="text/html" id="recipe-requirement-template">
+                            <tr>
+                                <td class="alignRight" data-bind="text: requirement.amount"></td>
+                                <td>
+                                    <a href="#" data-bind="visible: requirement.item.recipe, text: requirement.item.name, click: $root.selectRecipeByRequirement"></a>
+                                    <span data-bind="visible: !requirement.item.recipe, text: requirement.item.name"></span>
+                                    (<span class="amount" data-bind="text: requirement.currentInventory() || 0"></span>)
+                                </td>
+                            </tr>
+                        </script>
+                    </div>
+                </div>
+                <div id="actions">
+                    <input id="craftAll" type="button" data-bind="click: craftAll, value: strings['CraftAll'], enable: !itemBeingCrafted()" />
+                    <input id="craftAmount" value="1" data-bind="numeric, textInput: craftAmount.value, enable: !itemBeingCrafted(), event: { 'focus': craftAmount.onFocus }" />
+                    <input id="craft" type="button" data-bind="click: craft, value: strings['Craft'], visible: !itemBeingCrafted()" />
+                    <input id="cancel" type="button" data-bind="click: cancelCraft, value: strings['Cancel'], visible: itemBeingCrafted" />
+                </div>
             </div>
-            <div id="actions">
-                <input id="craftAll" type="button" data-bind="click: craftAll, value: strings['CraftAll'], enable: !itemBeingCrafted()" />
-                <input id="craftAmount" value="1" data-bind="numeric, textInput: craftAmount.value, enable: !itemBeingCrafted(), event: { 'focus': craftAmount.onFocus }" />
-                <input id="craft" type="button" data-bind="click: craft, value: strings['Craft'], visible: !itemBeingCrafted()" />
-                <input id="cancel" type="button" data-bind="click: cancelCraft, value: strings['Cancel'], visible: itemBeingCrafted" />
+            <div id="help">
+                <h4 data-bind="text: strings['HelpShortcuts']"></h4>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td class="key">g</td>
+                            <td data-bind="text: strings['HelpGather']"></td>
+                        </tr>
+                        <tr>
+                            <td class="key">[Space]</td>
+                            <td data-bind="text: strings['HelpCraftSelected']"></td>
+                        </tr>
+                        <tr>
+                            <td class="key">a</td>
+                            <td data-bind="text: strings['HelpCraftAll']"></td>
+                        </tr>
+                        <tr>
+                            <td class="key">1-9</td>
+                            <td data-bind="html: strings['HelpCraftSome']"></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
-        <div id="inventory">
-            <table id="inventoryTable" data-bind="visible: inventory.visible">
+        <div id="inventory" data-bind="visible: inventory.visible">
+            <div id="inventoryFilters">
+                <select id="inventorySortBy" data-bind="
+                    options: inventory.sortByOptions,
+                    optionsText: 'value',
+                    optionsValue: 'type',
+                    value: inventory.sortedBy,
+                    optionsCaption: strings['SortBy']">
+                </select>
+                <label>
+                    <input type="checkbox" data-bind="checked: inventory.reverse" />
+                    <span data-bind="text: strings['SortByReverse']"></span>
+                </label>
+                <div><input id="inventorySearch" data-bind="textInput: inventory.searchTerm, attr: { 'placeholder': strings['Search'] }" /></div>
+            </div>
+            <table id="inventoryTable">
                 <thead>
                     <tr>
                         <th>Item</th>
                         <th>Amount</th>
                     </tr>
                 </thead>
-                <tbody data-bind="template: { name: 'inventory-template', foreach: player.inventory.itemsArray, as: 'item' }"></tbody>
+                <tbody data-bind="template: { name: 'inventory-template', foreach: inventory.sortedArray, as: 'item' }"></tbody>
             </table>
             <script type="text/html" id="inventory-template">
-                <tr data-bind="if: amount">
+                <tr data-bind="if: amount() && visible()">
                     <td data-bind="text: id"></td>
                     <td data-bind="text: amount"></td>
                 </tr>
             </script>
-        </div>
-        <div id="help">
-            <h4>Shortcuts</h4>
-            <table>
-                <tbody>
-                    <tr>
-                        <td class="key">g</td>
-                        <td>Gather resources</td>
-                    </tr>
-                    <tr>
-                        <td class="key">[Space]</td>
-                        <td>Craft selected recipe (or cancel if crafting)</td>
-                    </tr>
-                    <tr>
-                        <td class="key">a</td>
-                        <td>Craft all of selected recipe</td>
-                    </tr>
-                    <tr>
-                        <td class="key">1-9</td>
-                        <td>Craft <i>n</i> of selected</td>
-                    </tr>
-                </tbody>
-            </table>
         </div>
     </div>
   </body>

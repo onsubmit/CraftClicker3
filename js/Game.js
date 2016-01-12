@@ -13,8 +13,70 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
 
         _this.inventory =
         {
-            visible: ko.observable(false)
-        }
+            visible: ko.observable(false),
+            sortByOptions: ko.observableArray(
+                [
+                    { value: _this.strings["SortByAlphabetical"], type: Game.InventorySortType.Alphabetical },
+                    { value: _this.strings["SortByAmount"], type: Game.InventorySortType.Amount }
+                ]),
+            sortedBy: ko.observable(),
+            searchTerm: ko.observable(),
+            reverse: ko.observable(),
+            sortedArray: ko.pureComputed(
+                function ()
+                {
+                    var sortBy = _this.inventory.sortedBy();
+                    var reverse = _this.inventory.reverse();
+                    var searchTerm = _this.inventory.searchTerm();
+                    var items = _this.player.inventory.itemsArray();
+                    if (sortBy === Game.InventorySortType.Amount)
+                    {
+                        items.sort(
+                            function (a, b)
+                            {
+                                var result = (a.amount() > b.amount() ? 1 : -1);
+                                if (reverse)
+                                {
+                                    result *= -1;
+                                }
+
+                                return result;
+                            });
+                    }
+                    else
+                    {
+                        items.sort(
+                            function (a, b)
+                            {
+                                var result = (a.id > b.id ? 1 : -1);
+                                if (reverse)
+                                {
+                                    result *= -1;
+                                }
+
+                                return result;
+                            });
+                    }
+
+                    if (searchTerm)
+                    {
+                        searchTerm = searchTerm.toLowerCase();
+                        ko.utils.arrayForEach(items, function(item)
+                        {
+                            item.visible(item.id.toLowerCase().indexOf(searchTerm) >= 0);
+                        });
+                    }
+                    else
+                    {
+                        ko.utils.arrayForEach(items, function(item)
+                        {
+                            item.visible(true);
+                        });
+                    }
+
+                    return items;
+                })
+        };
 
         _this.recipeCategories =
         {

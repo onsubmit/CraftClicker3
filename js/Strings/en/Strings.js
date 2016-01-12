@@ -15,11 +15,21 @@ OnSubmit.Using("Core.Strings", function (CoreStrings)
             strings["CraftTimePlural"] = "Craft time: {0} seconds"
             strings["GatherText"] = "Gather with {0}";
             strings["HaveResources"] = "Have Resources";
+            strings["HelpShortcuts"] = "Shortcuts";
+            strings["HelpGather"] = "Gather resources";
+            strings["HelpCraftSelected"] = "Craft selected recipe (or cancel if crafting)";
+            strings["HelpCraftAll"] = "Craft all of selected recipe";
+            strings["HelpCraftSome"] = "Craft <i>n</i> of selected";
             strings["NoForge"] = "No forge equipped";
             strings["NoPick"] = "No pick equipped";
             strings["Pick"] = "Pick";
             strings["RequiresForge"] = "Requires <a href='#' class='requiredForge'>{0}</a>";
+            strings["Search"] = "Search";
             strings["SellsFor"] = "Sells for {0}";
+            strings["SortBy"] = "Sort by...";
+            strings["SortByAlphabetical"] = "Alphabetical";
+            strings["SortByAmount"] = "Amount";
+            strings["SortByReverse"] = "Reverse";
             strings["Unlocks"] = "Unlocks: {0}";
 
             strings.makeListString = function (array)

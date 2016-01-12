@@ -1,5 +1,11 @@
 OnSubmit.Using("Game", function (Game)
 {
+    Game.InventorySortType =
+    {
+        Alphabetical: "Alphabetical",
+        Amount: "Amount"
+    };
+
     Game.Inventory = function ()
     {
         var _this = this;
@@ -381,16 +387,12 @@ OnSubmit.Using("Game", function (Game)
                 inventoryItem.amounts[metaDataId].amount.valueHasMutated();
             }
 
-            // Keep the observable array sorted
-            var items = _this.itemsArray();
-            items.push({ id: inventoryItem.amounts[metaDataId].toString(), amount: inventoryItem.amounts[metaDataId].amount});
-            items.sort(
-                function (a, b)
+            _this.itemsArray.push(
                 {
-                    return a.id > b.id ? 1 : -1;
+                    id: inventoryItem.amounts[metaDataId].toString(),
+                    amount: inventoryItem.amounts[metaDataId].amount,
+                    visible: ko.observable(true)
                 });
-
-            _this.itemsArray(items);
         }
     };
 });
