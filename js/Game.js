@@ -60,8 +60,8 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                 visible: ko.pureComputed(
                     function ()
                     {
-                        var pick = _this.player.inventory.forge();
-                        return pick && _this.forge.durability.amount() !== forge.maxDurability; 
+                        var forge = _this.player.inventory.forge();
+                        return forge && _this.forge.durability.amount() !== forge.maxDurability; 
                     })
             },
             image: ko.pureComputed(
@@ -185,13 +185,6 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
         
         _this.selectRecipe = function (item, event)
         {
-            if (!item.$element)
-            {
-                // Store a reference to the element.
-                // It is used only during setup and cancellation of the crafting animation.
-                item.$element = $(event.currentTarget || event.srcElement);
-            }
-
             item.selected(true);
         };
 
@@ -278,19 +271,18 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                 }
             }
             
-            var newPick = null;
             if (pick)
             {
-                var newDurability = pick.durability() - 1;
+                var newDurability = pick.metaData() - 1;
                 if (newDurability === 0)
                 {
                     // The pick just broke.
                     // Replace it with the highest level pick in the the player's inventory.
-                    newPick = _this.player.inventory.getHighestLevelPick();
+                    var newPick = _this.player.inventory.getHighestLevelItem(Game.ItemType.Pick);
 
                     if (newPick)
                     {
-                        _this.player.inventory.replacePickFromInventory(newPick);
+                        _this.player.inventory.replacePickFromInventory(newPick.item, newPick.metaData);
                     }
                     else
                     {
@@ -300,7 +292,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                 else
                 {
                     // The pick is not broken.
-                    pick.durability(newDurability);
+                    pick.metaData(newDurability);
                 }
             }
             
@@ -339,6 +331,11 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                     _this.craftAmount.value(counter++);
                 }
 
+                if (!item.$element)
+                {
+                    item.$element = $(".selectedRecipe");
+                }
+
                 var fullWidth = item.$element.width();
                 item.$element.width(0).animate(
                     { width: fullWidth },
@@ -354,10 +351,10 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                             return;
                         }
 
-                        _this.player.craft(item);
+                        var continueCrafting =_this.player.craft(item);
                         _unlockNewRecipes(item);
 
-                        if (--amount > 0 || (craftAsManyAsPossible && _this.player.inventory.canCraft(selectedItem.recipe, 1)))
+                        if (continueCrafting && (--amount > 0 || (craftAsManyAsPossible && _this.player.inventory.canCraft(selectedItem.recipe, 1))))
                         {
                             if (!craftAsManyAsPossible)
                             {
@@ -492,6 +489,16 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                     _unlockedRecipeCategoryMap[itemInnerScope.type].items.push(itemInnerScope);
                 }
             })(item);
+        };
+
+        var _calculateDurability = function(newDurability, maxDurability)
+        {
+            var maxWidth = 40;
+            var width = maxWidth * newDurability / maxDurability;
+            var red = Math.floor(255 * (1 - width / maxWidth));
+            var green = Math.floor(192 * (width / maxWidth));
+            var rgb = 'rgb(' + red + ', ' + green + ', 0)';
+            return { width: width, rgb: rgb };
         };
 
         (function _initialize()
@@ -643,21 +650,34 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                 {
                     if (newPick)
                     {
-                        newPick.durability.subscribe(
+                        newPick.metaData.subscribe(
                             function (newDurability)
                             {
-                                var maxWidth = 40;
-                                var width = maxWidth * newDurability / newPick.maxDurability;
-                                var red = Math.floor(255 * (1 - width / maxWidth));
-                                var green = Math.floor(192 * (width / maxWidth));
-                                var rgb = 'rgb(' + red + ', ' + green + ', 0)';
-                                
+                                var bar = _calculateDurability(newDurability, newPick.maxDurability);
                                 _this.pick.durability.amount(newDurability);
-                                _this.pick.durability.width(width + 'px');
-                                _this.pick.durability.backgroundColor(rgb);
+                                _this.pick.durability.width(bar.width + 'px');
+                                _this.pick.durability.backgroundColor(bar.rgb);
                             });
 
-                        newPick.durability.valueHasMutated();
+                        newPick.metaData.valueHasMutated();
+                    }
+                });
+
+            _this.player.inventory.forge.subscribe(
+                function (newForge)
+                {
+                    if (newForge)
+                    {
+                        newForge.metaData.subscribe(
+                            function (newDurability)
+                            {
+                                var bar = _calculateDurability(newDurability, newForge.maxDurability);
+                                _this.forge.durability.amount(newDurability);
+                                _this.forge.durability.width(bar.width + 'px');
+                                _this.forge.durability.backgroundColor(bar.rgb);
+                            });
+
+                        newForge.metaData.valueHasMutated();
                     }
                 });
 
@@ -674,7 +694,8 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                                     return ko.pureComputed(
                                         function ()
                                         {
-                                            return _this.player.inventory.getItemAmountObservable(item)();
+                                            var observable = _this.player.inventory.getTotalItemAmountObservable(item);
+                                            return observable && observable();
                                         });
                                 })(requirement.item);
                         }

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>CraftClicker 3.04 beta</title>
+    <title>CraftClicker 3.05 beta</title>
     <script src="js/Core/knockout-3.3.0.debug.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="js/Core/KnockoutExtensions.js"></script>
@@ -13,6 +13,7 @@
     <script src="js/Resources.js"></script>
     <script src="js/Items.js"></script>
     <script src="js/Pick.js"></script>
+    <script src="js/Forge.js"></script>
     <script src="js/Inventory.js"></script>
     <script src="js/Player.js"></script>
     <script src="js/Game.js"></script>
@@ -24,7 +25,7 @@
             <table id="equipmentTable">
                 <tr>
                     <td>
-                        <div id="pickContainer">
+                        <div class="equipmentContainer">
                             <img data-bind="click: step, attr: { alt: pick.name, title: pick.name, src: pick.image }" />
                             <div class="durabilityContainer" data-bind="visible: pick.durability.visible">
                                 <div class="durability" data-bind="style: { width:  pick.durability.width, 'background-color':  pick.durability.backgroundColor }"></div>
@@ -32,7 +33,7 @@
                         </div>
                     </td>
                     <td>
-                        <div id="forgeContainer">
+                        <div class="equipmentContainer">
                             <img data-bind="attr: { alt: forge.name, title: forge.name, src: forge.image }" />
                             <div class="durabilityContainer" data-bind="visible: forge.durability.visible">
                                 <div class="durability" data-bind="style: { width: forge.durability.width, 'background-color': forge.durability.backgroundColor }"></div>
@@ -152,7 +153,7 @@
             </table>
             <script type="text/html" id="inventory-template">
                 <tr data-bind="if: amount">
-                    <td data-bind="text: toString"></td>
+                    <td data-bind="text: id"></td>
                     <td data-bind="text: amount"></td>
                 </tr>
             </script>

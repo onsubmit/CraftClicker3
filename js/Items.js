@@ -215,7 +215,6 @@ OnSubmit.Using("Game", function (Game)
             {
                 type: Game.ItemType.Pick,
                 level: 1,
-                durability: 64,
                 maxDurability: 64,
                 lootModifiers:
                 {
@@ -337,6 +336,7 @@ OnSubmit.Using("Game", function (Game)
             {
                 type: Game.ItemType.Forge,
                 level: 1,
+                maxDurability: 20,
                 smeltModifiers: {},
                 recipe:
                 {
@@ -437,8 +437,7 @@ OnSubmit.Using("Game", function (Game)
         var _improvePick = function(newPick, oldPick)
         {
             newPick.level = oldPick.level + 1;
-            newPick.durability = oldPick.durability * 2;
-            newPick.maxDurability = newPick.durability;
+            newPick.maxDurability = oldPick.maxDurability * 2;
             for (var prop in oldPick.lootModifiers)
             {
                 newPick.lootModifiers[prop] = oldPick.lootModifiers[prop];
@@ -449,6 +448,7 @@ OnSubmit.Using("Game", function (Game)
         {
             multiplier = multiplier || 1.5;
             newForge.level = oldForge.level + 1;
+            newForge.maxDurability = oldForge.maxDurability * 2;
             for (var prop in oldForge.smeltModifiers)
             {
                 newForge.smeltModifiers[prop] = oldForge.smeltModifiers[prop] * multiplier;
@@ -555,7 +555,7 @@ OnSubmit.Using("Game", function (Game)
                 item.name = prop;
                 item.id = item.name.replace(/ /g, '');
 
-                if (item.type == Game.ItemType.Forges)
+                if (item.type == Game.ItemType.Forge)
                 {
                     item.image = 'images/forge.png';
                 }

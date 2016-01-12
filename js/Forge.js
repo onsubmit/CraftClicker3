@@ -1,9 +1,9 @@
 OnSubmit.Using("Game", function (Game)
 {
-    Game.Pick = function (pickName)
+    Game.Forge = function (forgeName)
     {
         var _this = this;
-        var _item = Game.Items.get(pickName);
+        var _item = Game.Items.get(forgeName);
 
         _this.name = _item.name;
         _this.type = _item.type;
@@ -11,7 +11,7 @@ OnSubmit.Using("Game", function (Game)
         _this.level = _item.level;
         _this.metaData = ko.observable(_item.maxDurability);
         _this.maxDurability = _item.maxDurability;
-        _this.lootModifiers = _item.lootModifiers;
+        _this.smeltModifiers = _item.smeltModifiers;
 
         _this.hasDurability = true;
     };
