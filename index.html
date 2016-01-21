@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>CraftClicker 3.06 beta</title>
+    <title>CraftClicker 3.07 beta</title>
     <script src="js/Core/knockout-3.3.0.debug.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="js/Core/KnockoutExtensions.js"></script>
@@ -23,7 +23,7 @@
     <div id="container">
         <div class="floatLeft">
             <div id="gatherActions">
-                <button id="gather" data-bind="click: step, text: gatherText"></button>
+                <button id="gather" data-bind="click: step, text: gatherText, enable: !itemBeingCrafted()"></button>
             </div>
             <div id="recipes">
                 <div id="equipment">

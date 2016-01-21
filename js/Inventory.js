@@ -350,7 +350,7 @@ OnSubmit.Using("Game", function (Game)
             var inventoryItem = _items[item.name];
             if (!inventoryItem)
             {
-                inventoryItem = { item: item, amounts: {}, total: ko.observable(0) };
+                inventoryItem = { item: item, amounts: {}, total: ko.observable(0).extend({ rateLimit: 50 }) };
                 _items[item.name] = inventoryItem;
             }
 
@@ -358,7 +358,7 @@ OnSubmit.Using("Game", function (Game)
             {
                 inventoryItem.amounts[metaDataId] =
                 {
-                    amount: ko.observable(amount),
+                    amount: ko.observable(amount).extend({ rateLimit: 50 }),
                     toString: (function (itemInnerScope)
                     {
                         return ko.pureComputed(

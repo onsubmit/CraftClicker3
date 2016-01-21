@@ -22,6 +22,22 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
             sortedBy: ko.observable(),
             searchTerm: ko.observable(),
             reverse: ko.observable(),
+            currentReverse: false,
+            currentSortBy: null,
+            lastSortTime: 0,
+            doSort: function ()
+                {
+                    if (_this.inventory.currentReverse !== _this.inventory.reverse() ||
+                        _this.inventory.currentSortBy !== _this.inventory.sortedBy())
+                    {
+                        // Player changed the checked state of the "Reverse" checkbox
+                        return true;
+                    }
+
+                    // Otherwise only sort once ever second at a maximum
+                    var elapsed = new Date().getTime() - _this.inventory.lastSortTime;
+                    return elapsed > 1000;
+                },
             sortedArray: ko.pureComputed(
                 function ()
                 {
@@ -29,33 +45,51 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                     var reverse = _this.inventory.reverse();
                     var searchTerm = _this.inventory.searchTerm();
                     var items = _this.player.inventory.itemsArray();
-                    if (sortBy === Game.InventorySortType.Amount)
-                    {
-                        items.sort(
-                            function (a, b)
-                            {
-                                var result = (a.amount() > b.amount() ? 1 : -1);
-                                if (reverse)
-                                {
-                                    result *= -1;
-                                }
 
-                                return result;
-                            });
+                    function sort(x, y)
+                    {
+                        if (x === y)
+                        {
+                            return 0;
+                        }
+                        else if (x > y)
+                        {
+                            result = 1;
+                        }
+                        else
+                        {
+                            result = -1;
+                        }
+
+                        if (reverse)
+                        {
+                            result = 0 - result;
+                        }
+
+                        return result;
+                    }
+
+                    // Only sort once per second
+                    if (_this.inventory.doSort())
+                    {
+                        if (sortBy === Game.InventorySortType.Amount)
+                        {
+                            items.sort(function (a, b) { return sort(a.amount(), b.amount()); });
+                        }
+                        else
+                        {
+                            items.sort(function (a, b) { return sort(a.id, b.id); });
+                        }
+
+                        _this.inventory.lastSortTime = new Date().getTime();
                     }
                     else
                     {
-                        items.sort(
-                            function (a, b)
-                            {
-                                var result = (a.id > b.id ? 1 : -1);
-                                if (reverse)
-                                {
-                                    result *= -1;
-                                }
-
-                                return result;
-                            });
+                        // We still need to read the amount observable to ensure the subscriptions are set up.
+                        ko.utils.arrayForEach(items, function(item)
+                        {
+                            var hamburgers = item.amount();
+                        });
                     }
 
                     if (searchTerm)
@@ -74,6 +108,8 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                         });
                     }
 
+                    _this.inventory.currentReverse = _this.inventory.reverse();
+                    _this.inventory.currentSortBy = _this.inventory.sortedBy();
                     return items;
                 })
         };
@@ -799,11 +835,17 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                 }
                 else if (e.which  == 65 || e.which == 97) // '[Aa]'
                 {
-                    _this.craftAll();
+                    if (!_this.itemBeingCrafted())
+                    {
+                        _this.craftAll();
+                    }
                 }
                 else if (e.which == 71 || e.which == 103) // '[Gg]'
                 {
-                    _this.step();
+                    if (!_this.itemBeingCrafted())
+                    {
+                        _this.step();
+                    }
                 }
                 else if (e.which >= 49 && e.which <= 57) // '[1-9]'
                 {
