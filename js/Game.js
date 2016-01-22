@@ -289,6 +289,9 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
         _this.selectRecipeByRequirement = function(requirement)
         {
             requirement.item.selected(true);
+
+            var $recipeScroll = $("#recipeScroll");
+            $recipeScroll.scrollTop(requirement.item.getElement().offset().top - $recipeScroll.offset().top + $recipeScroll.scrollTop());
         };
 
         _this.selectRecipeByForge = function(forge)
@@ -307,7 +310,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
             var item = _this.itemBeingCrafted();
             item.crafting(false);
             _this.itemBeingCrafted(null);
-            item.$element.stop(true, true);
+            item.getElement().stop(true, true);
         };
 
         _this.craftAll = function ()
@@ -429,13 +432,8 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                     _this.craftAmount.value(counter++);
                 }
 
-                if (!item.$element)
-                {
-                    item.$element = $(".selectedRecipe");
-                }
-
-                var fullWidth = item.$element.width();
-                item.$element.width(0).animate(
+                var fullWidth = item.getElement().width();
+                item.getElement().width(0).animate(
                     { width: fullWidth },
                     craftTime,
                     "linear",
@@ -647,6 +645,19 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                             });
                     })(item);
 
+                    item.getElement = (function (itemInnerScope)
+                    {
+                        return function ()
+                        {
+                            if (!itemInnerScope.$element)
+                            {
+                                itemInnerScope.$element = $(".selectedRecipe");
+                            }
+
+                            return itemInnerScope.$element;
+                        }
+                    })(item);
+
                     item.selected = ko.observable(false);
                     item.crafting = ko.observable(false);
                     (function (itemInnerScope)
@@ -792,8 +803,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                                     return ko.pureComputed(
                                         function ()
                                         {
-                                            var observable = _this.player.inventory.getTotalItemAmountObservable(item);
-                                            return observable && observable();
+                                            return _this.player.inventory.getTotalItemAmountObservable(item)();
                                         });
                                 })(requirement.item);
                         }
