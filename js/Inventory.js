@@ -266,10 +266,13 @@ OnSubmit.Using("Game", function (Game)
         _this.getTotalItemAmountObservable = function (item)
         {
             var itemName = item.name;
-            if (_items[itemName])
+            if (!_items[itemName])
             {
-                return _items[itemName].total;
+                _this.mergeItem(item, 0);
+                
             }
+            
+            return _items[itemName].total;
         };
 
         _this.getHighestLevelItem = function(itemType)
