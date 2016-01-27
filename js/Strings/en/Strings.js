@@ -20,6 +20,7 @@ OnSubmit.Using("Core.Strings", function (CoreStrings)
             strings["HelpCraftSelected"] = "Craft selected recipe (or cancel if crafting)";
             strings["HelpCraftAll"] = "Craft all of selected recipe";
             strings["HelpCraftSome"] = "Craft <i>n</i> of selected";
+            strings["Level"] = "Level {0}";
             strings["NoForge"] = "No forge equipped";
             strings["NoPick"] = "No pick equipped";
             strings["Pick"] = "Pick";

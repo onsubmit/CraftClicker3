@@ -176,6 +176,37 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                 })
         };
 
+        _this.playerInfo =
+        {
+            xp:
+            {
+                width: ko.pureComputed(
+                    function ()
+                    {
+                        var maxWidth = 290;
+                        return Math.round(maxWidth * _this.player.xp() / _this.player.xpMax()) + 'px';
+                    })
+            },
+            level:
+            {
+                showDetails: ko.observable(false),
+                text: ko.pureComputed(
+                    function ()
+                    {
+                        if (_this.playerInfo.level.showDetails())
+                        {
+                            return Math.round(_this.player.xp()) + ' / ' + _this.player.xpMax();
+                        }
+                        
+                        return Helpers.String.format(_this.strings["Level"], _this.player.level());
+                    })
+            },
+            click: function ()
+            {
+                _this.playerInfo.level.showDetails(!_this.playerInfo.level.showDetails());
+            },
+        };
+
         _this.gatherText = ko.pureComputed(
             function ()
             {
@@ -447,7 +478,8 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                             return;
                         }
 
-                        var continueCrafting =_this.player.craft(item);
+                        var xpModifier = Math.max(1, item.recipe.craftTime / 5.0);
+                        var continueCrafting =_this.player.craft(item, xpModifier);
                         _unlockNewRecipes(item);
 
                         if (continueCrafting && (--amount > 0 || (craftAsManyAsPossible && _this.player.inventory.canCraft(selectedItem.recipe, 1))))
