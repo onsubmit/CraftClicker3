@@ -31,6 +31,26 @@ table#equipmentTable td {
   padding: 1px;
 }
 
+div#money {
+  text-align: right;
+  color: white;
+  padding: 5px;
+}
+
+div#experience {
+  border: 1px solid #0d0d0d;
+  border-bottom-style: none
+}
+
+div#experienceBar {
+  background-color: #909;
+}
+
+div#experienceBarText {
+  width: 290px;
+  cursor: pointer;
+}
+
 div#inventory {
   margin-left: 300px;
 }
@@ -344,4 +364,18 @@ div#help td.key {
 
 .floatLeft {
   float: left;
+}
+
+.smallBar {
+  height: 20px;
+}
+
+.smallBarText {
+  text-align: center;
+  vertical-align: middle;
+  line-height: 20px;
+  color: white;
+  font-weight: bold;
+  text-shadow: 1px 1px 1px #000;
+  position: absolute;
 }

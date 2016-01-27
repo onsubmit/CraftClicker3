@@ -40,6 +40,32 @@ OnSubmit.Using("Game", function (Game)
 
             _this.isDirty.valueHasMutated();
         };
+
+        _this.mergeItemOrSell = function(item, amount, metaDataId)
+        {
+            metaDataId = parseInt(metaDataId) || 0;
+
+            var currentAmount = 0;
+            var keepAmount = _this.getItemKeepAmount(item);
+            if (keepAmount >= 0 && (currentAmount = _this.getItemAmount(item)) + amount > keepAmount)
+            {
+                // Crafting this item will exceed the amount the player wishes to keep.
+                // Sell any extra.
+                var numToSell = currentAmount + recipe.makes - keepAmount;
+                var numToPutIntoInventory = makes - numToSell;
+                if (numToPutIntoInventory > 0)
+                {
+                    _this.mergeItem(item, numToPutIntoInventory, metaDataId);
+                }
+
+                return numToPutIntoInventory;
+            }
+            else
+            {
+                _this.mergeItem(item, amount, metaDataId);
+                return 0;
+            }
+        }
         
         _this.canCraft = function (recipe, amount, effectiveItems)
         {
@@ -94,7 +120,7 @@ OnSubmit.Using("Game", function (Game)
             amount = amount || 1;
             var recipe = item.recipe;
             var continueCrafting = true;
-            
+
             ko.utils.arrayForEach(recipe.requirements, function(req)
             {
                 if (req.item.type === Game.ItemType.Forge)
@@ -129,6 +155,7 @@ OnSubmit.Using("Game", function (Game)
                 }
             });
 
+            var metaDataId = 0;
             if (item.type === Game.ItemType.Bar)
             {
                 var forge = _this.forge();
@@ -158,19 +185,21 @@ OnSubmit.Using("Game", function (Game)
                 var pick = _this.pick();
                 if (!pick || pick.level < item.level)
                 {
+                    var numToSell = 0;
                     if (pick)
                     {
                         // Auto equip new pick if it's higher level than the current one.
                         // Place current pick back into inventory.
-                        _this.mergeItem(pick, 1, pick.metaData());
+                        numToSell = _this.mergeItemOrSell(pick, 1, pick.metaData());
                     }
 
                     _this.pick(new Game.Pick(item.name));
-                    return;
+                    return { continueCrafting: true, numToSell: numToSell };
                 }
                 else
                 {
                     item = new Game.Pick(item.name);
+                    metaDataId = item.metaData();
                 }
             }
             else if (item.type === Game.ItemType.Forge)
@@ -178,23 +207,23 @@ OnSubmit.Using("Game", function (Game)
                 var forge = _this.forge();
                 if (!forge || forge.level < item.level)
                 {
+                    var numToSell = 0;
                     if (forge)
                     {
                         // Auto equip new forge if it's higher level than the current one.
                         // Place current forge back into inventory.
-                        _this.mergeItem(forge, 1, forge.metaData());
+                        numToSell = _this.mergeItemOrSell(forge, 1, forge.metaData());
                     }
 
                     _this.forge(new Game.Forge(item.name));
-                    return;
+                    return { continueCrafting: true, numToSell: numToSell };
                 }
                 else
                 {
                     item = new Game.Forge(item.name);
+                    metaDataId = item.metaData();
                 }
             }
-
-            _this.mergeItem(item, amount * recipe.makes);
 
             if (recipe.forge)
             {
@@ -207,7 +236,8 @@ OnSubmit.Using("Game", function (Game)
                 }
             }
 
-            return continueCrafting;
+            var numToSell = _this.mergeItemOrSell(item, amount * recipe.makes, metaDataId);
+            return { continueCrafting: continueCrafting, numToSell: numToSell };
         };
         
         _this.replacePickFromInventory = function (newPick, metaDataId)
@@ -237,7 +267,6 @@ OnSubmit.Using("Game", function (Game)
             metaDataId = parseInt(metaDataId) || 0;
             var currentAmount = _this.getItemAmount(item, metaDataId);
             _setItemAmount(item, currentAmount - amount, metaDataId);
-            _this.isDirty.valueHasMutated();
         };
 
         _this.getItemAmount = function (item, metaDataId)
@@ -261,6 +290,16 @@ OnSubmit.Using("Game", function (Game)
             }
 
             return _items[item.name].amounts[metaDataId].amount();
+        };
+
+        _this.getItemKeepAmount = function (item)
+        {
+            if (!_items[item.name])
+            {
+                _addNewItem(item, 0, 0);
+            }
+
+            return _items[item.name].keep();
         };
 
         _this.getTotalItemAmountObservable = function (item)
@@ -353,7 +392,14 @@ OnSubmit.Using("Game", function (Game)
             var inventoryItem = _items[item.name];
             if (!inventoryItem)
             {
-                inventoryItem = { item: item, amounts: {}, total: ko.observable(0).extend({ rateLimit: 50 }) };
+                inventoryItem =
+                    {
+                        item: item,
+                        amounts: {},
+                        keep: ko.observable(-1),
+                        total: ko.observable(0).extend({ rateLimit: 50 })
+                    };
+
                 _items[item.name] = inventoryItem;
             }
 

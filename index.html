@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>CraftClicker 3.08 beta</title>
+    <title>CraftClicker 3.09 beta</title>
     <script src="js/Core/knockout-3.3.0.debug.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="js/Core/KnockoutExtensions.js"></script>
@@ -26,6 +26,12 @@
                 <button id="gather" data-bind="click: step, text: gatherText, enable: !itemBeingCrafted()"></button>
             </div>
             <div id="recipes">
+                <div id="experience" class="smallBar">
+                    <div id="experienceBar" class="smallBar" data-bind="style: { width: playerInfo.xp.width }">
+                        <div id="experienceBarText" class="smallBar smallBarText" data-bind="text: playerInfo.level.text, click: playerInfo.click"></div>
+                    </div>
+                </div>
+                <div id="money" data-bind="text: player.moneyString"></div>
                 <div id="equipment">
                     <table id="equipmentTable">
                         <tr>
@@ -52,12 +58,6 @@
                         </tr>
                     </table>
                 </div>
-                <div id="experience" class="smallBar">
-                    <div id="experienceBar" class="smallBar">
-                        <div id="experienceBarText" class="smallBar smallBarText"></div>
-                    </div>
-                </div>
-                <div id="money"></div>
                 <div id="recipeFilters">
                     <select id="recipeCategoryFilter" data-bind="
                         options: recipeCategories.unlocked,
