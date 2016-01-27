@@ -137,7 +137,7 @@
                 </div>
                 <div id="actions">
                     <input id="craftAll" type="button" data-bind="click: craftAll, value: strings['CraftAll'], enable: !itemBeingCrafted()" />
-                    <input id="craftAmount" value="1" data-bind="numeric, textInput: craftAmount.value, enable: !itemBeingCrafted(), event: { 'focus': craftAmount.onFocus }" />
+                    <input id="craftAmount" type="number" min="1" value="1" data-bind="numeric, textInput: craftAmount.value, enable: !itemBeingCrafted(), event: { 'focus': craftAmount.onFocus }" />
                     <input id="craft" type="button" data-bind="click: craft, value: strings['Craft'], visible: !itemBeingCrafted()" />
                     <input id="cancel" type="button" data-bind="click: cancelCraft, value: strings['Cancel'], visible: itemBeingCrafted" />
                 </div>
