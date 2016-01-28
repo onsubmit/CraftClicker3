@@ -323,17 +323,21 @@ OnSubmit.Using("Game", function (Game)
             for (var itemName in _items)
             {
                 var item = _items[itemName].item;
-                if (item.type && item.type === itemType && _this.getItemAmount(item) > 0 && item.level >= highestLevel)
+                if (item.type && item.type === itemType && item.level >= highestLevel)
                 {
-                    var durability = item.metaData();
-                    if (lowestDurability < 0 || item.level > highestLevel || (item.level === highestLevel && durability < lowestDurability))
+                    var amounts = _items[itemName].amounts;
+                    for (var durability in amounts)
                     {
-                        // Return the pick/forge of highest level.
-                        // If there are multiple, choose the one with the lowest durability so it can be removed more quickly.
-                        // Otherwise, as long as the player has unused picks/forges in their inventory, the partially used ones will never be removed.
-                        bestItem = item;
-                        highestLevel = item.level;
-                        lowestDurability = durability;
+                        var amount = amounts[durability].amount()
+                        if (amount > 0 && (lowestDurability < 0 || item.level > highestLevel || (item.level === highestLevel && durability < lowestDurability)))
+                        {
+                            // Return the pick/forge of highest level.
+                            // If there are multiple, choose the one with the lowest durability so it can be removed more quickly.
+                            // Otherwise, as long as the player has unused picks/forges in their inventory, the partially used ones will never be removed.
+                            bestItem = item;
+                            highestLevel = item.level;
+                            lowestDurability = durability;
+                        }
                     }
                 }
             }
@@ -377,7 +381,8 @@ OnSubmit.Using("Game", function (Game)
             {
                 for (var durability in _items[itemName].amounts)
                 {
-                    if (lowestDurability < 0 || durability < lowestDurability)
+                    var amount = _items[itemName].amounts[durability].amount();
+                    if (amount > 0 && (lowestDurability < 0 || durability < lowestDurability))
                     {
                         lowestDurability = durability;
                     }
