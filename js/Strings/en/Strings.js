@@ -7,8 +7,10 @@ OnSubmit.Using("Core.Strings", function (CoreStrings)
         function (strings)
         {
             strings["AllCategories"] = "All Categories";
+            strings["Amount"] = "Amount";
             strings["BareHands"] = "Bare Hands";
             strings["Cancel"] = "Cancel";
+            strings["Close"] = "Close";
             strings["Craft"] = "Craft";
             strings["CraftAll"] = "Craft All";
             strings["CraftTime"] = "Craft time: {0} second"
@@ -20,6 +22,11 @@ OnSubmit.Using("Core.Strings", function (CoreStrings)
             strings["HelpCraftSelected"] = "Craft selected recipe (or cancel if crafting)";
             strings["HelpCraftAll"] = "Craft all of selected recipe";
             strings["HelpCraftSome"] = "Craft <i>n</i> of selected";
+            strings["Item"] = "Item";
+            strings["Keep"] = "Keep";
+            strings["KeepHelp1"] = "Click the value to specify the amount to be kept.";
+            strings["KeepHelp2"] = "Any extra will be sold automatically.";
+            strings["KeepHelp3"] = "Delete the value to keep all items.";
             strings["Level"] = "Level {0}";
             strings["NoForge"] = "No forge equipped";
             strings["NoPick"] = "No pick equipped";

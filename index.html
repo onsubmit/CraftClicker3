@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>CraftClicker 3.09 beta</title>
+    <title>CraftClicker 3.10 beta</title>
     <script src="js/Core/knockout-3.3.0.debug.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="js/Core/KnockoutExtensions.js"></script>
@@ -31,7 +31,7 @@
                         <div id="experienceBarText" class="smallBar smallBarText" data-bind="text: playerInfo.level.text, click: playerInfo.click"></div>
                     </div>
                 </div>
-                <div id="money" data-bind="text: player.moneyString"></div>
+                <div id="money" data-bind="text: player.inventory.moneyString"></div>
                 <div id="equipment">
                     <table id="equipmentTable">
                         <tr>
@@ -184,8 +184,19 @@
             <table id="inventoryTable">
                 <thead>
                     <tr>
-                        <th>Item</th>
-                        <th>Amount</th>
+                        <th data-bind="text: strings['Item']"></th>
+                        <th data-bind="text: strings['Amount']"></th>
+                        <th>
+                            <span data-bind="text: strings['Keep']"></span><sup><a href="#" id="keepHelp" data-bind="click: inventory.keepHelp.show, visible: !inventory.keepHelp.shown()">?</a></sup>
+                            <div id="keepHelpTooltip" data-bind="visible: inventory.keepHelp.visible">
+                                <ol>
+                                    <li data-bind="text: strings['KeepHelp1']"></li>
+                                    <li data-bind="text: strings['KeepHelp2']"></li>
+                                    <li data-bind="text: strings['KeepHelp3']"></li>
+                                </ol>
+                                <a href="#" class="floatRight" data-bind="text: strings['Close'], click: inventory.keepHelp.hide"></a>
+                            </div>
+                        </th>
                     </tr>
                 </thead>
                 <tbody data-bind="template: { name: 'inventory-template', foreach: inventory.sortedArray, as: 'item' }"></tbody>
@@ -194,6 +205,10 @@
                 <tr data-bind="if: amount() && visible()">
                     <td data-bind="text: id"></td>
                     <td data-bind="text: amount"></td>
+                    <td>
+                        <div data-bind="text: keepText, click: showKeepTextbox, visible: !keepTextboxVisible()"></div>
+                        <input type="tel" class="keep" data-bind="numeric, value: keep, visible: keepTextboxVisible, hasFocus: keepTextboxVisible, event: { blur: hideKeepTextbox }"></span>
+                    </td>
                 </tr>
             </script>
         </div>

@@ -14,6 +14,17 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
         _this.inventory =
         {
             visible: ko.observable(false),
+            keepHelp:
+                {
+                    visible: ko.observable(false),
+                    shown: ko.observable(false),
+                    show: function ()
+                        {
+                            _this.inventory.keepHelp.visible(true);
+                            _this.inventory.keepHelp.shown(true);
+                        },
+                    hide: function () { _this.inventory.keepHelp.visible(false); },
+                },
             sortByOptions: ko.observableArray(
                 [
                     { value: _this.strings["SortByAlphabetical"], type: Game.InventorySortType.Alphabetical },

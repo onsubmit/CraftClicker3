@@ -15,6 +15,28 @@ OnSubmit.Using("Game", function (Game)
         _this.pick = ko.observable();
         _this.forge = ko.observable();
         _this.isDirty = ko.observable(false);
+
+        _this.money = 
+        {
+            copper: ko.observable(0),
+            silver: ko.observable(0),
+            gold: ko.observable(0),
+            platinum: ko.observable(0)
+        };
+
+        _this.collect = function (drops)
+        {
+            for (var prop in drops)
+            {
+                var drop = drops[prop];
+                var numToSell = _this.mergeItemOrSell(drop.item, drop.amount);
+
+                if (numToSell > 0)
+                {
+                    _this.sellItem(drop.item, numToSell);
+                }
+            }
+        };
         
         _this.mergeItem = function(item, amount, metaDataId)
         {
@@ -51,14 +73,15 @@ OnSubmit.Using("Game", function (Game)
             {
                 // Crafting this item will exceed the amount the player wishes to keep.
                 // Sell any extra.
-                var numToSell = currentAmount + recipe.makes - keepAmount;
-                var numToPutIntoInventory = makes - numToSell;
-                if (numToPutIntoInventory > 0)
+                var numToSell = currentAmount + amount - keepAmount;
+                var numToPutIntoInventory = amount - numToSell;
+                if (numToPutIntoInventory !== 0)
                 {
+                    // 'numToPutIntoInventory' can be negative if the player just entered a 'keep' amount less than the current inventory amount
                     _this.mergeItem(item, numToPutIntoInventory, metaDataId);
                 }
 
-                return numToPutIntoInventory;
+                return numToSell;
             }
             else
             {
@@ -348,6 +371,83 @@ OnSubmit.Using("Game", function (Game)
             }
         };
 
+        _this.sellItem = function (item, amount)
+        {
+            var multiplier = 1;
+            if (item.type === Game.ItemType.Forge || item.type === Game.ItemType.Pick)
+            {
+                // Damaged items sell for less
+                multiplier = item.metaData() / item.maxDurability;
+            }
+
+            var worth =  Math.ceil(amount * item.sellValue * multiplier);
+            var c = _this.money.copper();
+            var newC = c + worth;
+
+            if (newC > 100)
+            {
+                var s = _this.money.silver();
+                var newS = s + Math.floor(newC / 100);
+                newC = newC % 100;
+                _this.money.copper(newC);
+
+                if (newS > 100)
+                {
+                    var g = _this.money.gold();
+                    var newG = g + Math.floor(newS / 100);
+                    newS = newS % 100;
+                    _this.money.silver(newS);
+
+                    if (newG > 100)
+                    {
+                        var p = _this.money.platinum();
+                        var newP = p + Math.floor(newP / 100);
+                        newG = newG % 100;
+
+                    }
+
+                    _this.money.gold(newG);
+                    _this.money.platinum(newP);
+                }
+                else
+                {
+                    _this.money.silver(newS);
+                }
+            }
+            else
+            {
+                _this.money.copper(newC);
+            }
+        };
+
+        _this.moneyString = ko.pureComputed(
+            function ()
+            {
+                var moneyString = '';
+                var p = _this.money.platinum();
+                if (p)
+                {
+                    moneyString += p + "p ";
+                }
+
+                var g = _this.money.gold();
+                if (g || moneyString)
+                {
+                    moneyString += g + "g ";
+                }
+
+                var s = _this.money.silver();
+                if (s || moneyString)
+                {
+                    moneyString += s + "s ";
+                }
+
+                var c = _this.money.copper();
+                moneyString += c + "c";
+
+                return moneyString;
+            });
+
         var _setItemAmount = function (item, amount, metaDataId)
         {
             metaDataId = parseInt(metaDataId) || 0;
@@ -441,12 +541,44 @@ OnSubmit.Using("Game", function (Game)
                 inventoryItem.amounts[metaDataId].amount.valueHasMutated();
             }
 
-            _this.itemsArray.push(
+            var newItem = 
                 {
                     id: inventoryItem.amounts[metaDataId].toString(),
                     amount: inventoryItem.amounts[metaDataId].amount,
+                    keep: ko.observable(),
+                    keepText: (function (itemInnerScope)
+                        {
+                            return ko.pureComputed(
+                                function ()
+                                {
+                                    var keep = itemInnerScope.keep();
+                                    if (keep >= 0)
+                                    {
+                                        return keep;
+                                    }
+
+                                    return "\u221E"; // Infinity symbol
+                                });
+                        })(inventoryItem),
+                    keepTextboxVisible: ko.observable(false),
+                    showKeepTextbox: function () { this.keepTextboxVisible(true); },
+                    hideKeepTextbox: function () { this.keepTextboxVisible(false); },
                     visible: ko.observable(true)
-                });
+                };
+
+                newItem.keep.subscribe(
+                    (function (itemInnerScope)
+                    {
+                        return function (newValue)
+                        {
+                            itemInnerScope.keep(parseInt(newValue) || -1);
+
+                            // Sell off any inventory over the desired keep amount
+                            _this.collect([ { item: itemInnerScope.item, amount: 0 } ]);
+                        };
+                    })(inventoryItem));
+
+            _this.itemsArray.push(newItem);
         }
     };
 });
