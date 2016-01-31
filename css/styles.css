@@ -362,8 +362,51 @@ div#help td.key {
   padding: 4px;
 }
 
+a#keepHelp:link, a#keepHelp:visited {
+  color: #00E;
+}
+
+a#keepHelp:hover, a#keepHelp:active {
+  color: #551A8B;
+}
+
+div#keepHelpTooltip {
+  position: fixed;
+  font-size: 0.8125em;
+  padding: 5px;
+  color: #ddd;
+  background: #002;
+  opacity: 0.9;
+  z-index: 10;
+  text-align: left;
+  left: 500px;
+  display: block;
+  box-shadow: 0px 0px 5px #999;
+}
+
+div#keepHelpTooltip ol {
+  padding-left: 20px;
+  margin: 0;
+}
+
+div#keepHelpTooltip a:link, div#keepHelpTooltip a:visited {
+  color: #FFF;
+}
+
+div#keepHelpTooltip a:hover, div#keepHelpTooltip a:active {
+  color: #666;
+}
+
+input.keep {
+  width: 3em;
+}
+
 .floatLeft {
   float: left;
+}
+
+.floatRight {
+  float: right;
 }
 
 .smallBar {
