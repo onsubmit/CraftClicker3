@@ -18,6 +18,6 @@ OnSubmit.Using("Core.Helpers", function (Helpers)
             }
 
             return str;
-        },
+        }
     };
 });

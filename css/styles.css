@@ -15,15 +15,15 @@ h1, h2, h3, h4, h5, h6, p {
   margin: 0 0 6px 0;
 }
 
-div#container {
+#container {
   margin: 10px;
 }
 
-table#equipmentTable {
+#equipmentTable {
   margin-bottom: 6px;
 }
 
-table#equipmentTable td {
+#equipmentTable td {
   width: 40px;
   height: 40px;
   border: 2px inset rgba(192, 192, 192, 0.5);
@@ -31,55 +31,55 @@ table#equipmentTable td {
   padding: 1px;
 }
 
-div#money {
+#money {
   text-align: right;
   color: white;
   padding: 5px;
 }
 
-div#experience {
+#experience {
   border: 1px solid #0d0d0d;
   border-bottom-style: none
 }
 
-div#experienceBar {
+#experienceBar {
   background-color: #909;
 }
 
-div#experienceBarText {
+#experienceBarText {
   width: 290px;
   cursor: pointer;
 }
 
-div#inventory {
+#inventory {
   margin-left: 300px;
 }
 
-table#inventoryTable {
+#inventoryTable {
   border-spacing: 0;
   border-collapse: collapse;
   font-size: 1em;
   width: 200px;
 }
 
-table#inventoryTable tr {
+#inventoryTable tr {
   border-bottom : 1px solid #ddd;
 }
 
-table#inventoryTable td, table#inventoryTable th {
+#inventoryTable td, table#inventoryTable th {
   margin: 0;
   padding: 4px;
   white-space: nowrap;
   text-align: left;
 }
 
-div#recipeFilters {
+#recipeFilters {
   padding: 4px;
   color: #aaa;
   font-size: 1em;
 }
 
-input#recipeSearch {
+#recipeSearch {
   height: 1.4em;
   color: #aaa;
   background-color: rgba(0, 0, 0, 0.5);
@@ -89,7 +89,7 @@ input#recipeSearch {
   padding-left: 2px;
 }
 
-select#recipeCategoryFilter {
+#recipeCategoryFilter {
   font-family: georgia, arial, helvetica, sans-serif;
   height: 1.4em;
   color: #aaa;
@@ -98,16 +98,16 @@ select#recipeCategoryFilter {
   margin-top: 4px;
 }
 
-select#recipeCategoryFilter option {
+#recipeCategoryFilter option {
   background-color: #111;
 }
 
-div#inventoryFilters {
+#inventoryFilters {
   padding: 4px;
   font-size: 1em;
 }
 
-input#inventorySearch {
+#inventorySearch {
   height: 1.4em;
   border: 0;
   border: 1px inset #ddd;
@@ -117,7 +117,7 @@ input#inventorySearch {
   padding-left: 2px;
 }
 
-select#inventorySortBy {
+#inventorySortBy {
   font-family: georgia, arial, helvetica, sans-serif;
   height: 1.4em;
   border: 1px inset #666;
@@ -127,7 +127,7 @@ input[type='checkbox'] {
   vertical-align: bottom;
 }
 
-div#recipes {
+#recipes {
   width: 290px;
   border: 1px solid #999;
   background: url('../images/bg.png');
@@ -135,21 +135,21 @@ div#recipes {
   font-size: 0.8em;
 }
 
-div#recipeScroll {
+#recipeScroll {
   height: 300px;
   overflow-y: auto;
   overflow-x: hidden;
   clear: both;
 }
 
-ul#recipeCategories {
+#recipeCategories {
   cursor: default;
   list-style-type: none;
   margin: 0;
   padding: 0;
 }
 
-ul#recipeCategories > li > span {
+#recipeCategories > li > span {
   font-weight: bold;
   text-decoration: underline;
   color: #fff;
@@ -201,36 +201,36 @@ ul.recipeCategory li.background {
   text-shadow: 1px 1px #000;
 }
 
-div#recipeRequirementsScroll {
+#recipeRequirementsScroll {
   height: 250px;
   overflow-y: auto;
   overflow-x: hidden;
 }
 
-div#recipeRequirements {
+#recipeRequirements {
   color: white;
   height: 232px;
   padding: 8px;
   text-shadow: 2px 2px #000;
 }
 
-div#recipeRequirements .recipeDesc {
+#recipeRequirements .recipeDesc {
   color: #999;
 }
 
-div#recipeRequirements .recipeUnlocks {
+#recipeRequirements .recipeUnlocks {
   color: #FF8E46;
 }
 
-div#recipeRequirements .recipeOutput {
+#recipeRequirements .recipeOutput {
   color: #00DD00;
 }
 
-div#recipeRequirements .recipeSellsFor {
+#recipeRequirements .recipeSellsFor {
   color: #666;
 }
 
-table#recipeRequirementList {
+#recipeRequirementList {
   color: white;
   border-spacing: 0;
   border-collapse: separate;
@@ -245,27 +245,27 @@ a:hover, a:active {
   color: #bbb;
 }
 
-table#recipeRequirementList td {
+#recipeRequirementList td {
   margin: 0;
   padding: 2px;
 }
 
-table#recipeRequirementList td span.amount {
+#recipeRequirementList td span.amount {
   color: #ccc;
 }
 
-table#recipeRequirementList tr.missing span.amount {
+#recipeRequirementList tr.missing span.amount {
   color: #b00;
 }
 
-div#gatherActions {
+#gatherActions {
   width: 290px;
   background-color: white;
   font-weight: bold;
   margin-bottom: 10px;
 }
 
-div#gatherActions button {
+#gatherActions button {
   padding: 4px;
   margin-top: 4px;
   font-weight: bold;
@@ -278,8 +278,20 @@ div.equipmentContainer {
   height: 40px;
 }
 
-img#gather {
+#gather {
   cursor: hand;
+}
+
+#gatherProgress {
+  visibility: hidden;
+  background-color: #FF8E46;
+  overflow: visible !important; /* jQuery's animate forces overflow: hidden; */
+  height: 4px;
+  line-height: 4px;
+}
+
+#gatherProgress.done {
+  background-color: #00DD00;
 }
 
 div.durabilityContainer {
@@ -299,14 +311,14 @@ div.durability {
   border-right: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-div#actions {
+#actions {
   height: 40px;
   padding: 4px;
   text-align: center;
   margin-bottom: 10px;
 }
 
-div#actions input[type=button] {
+#actions input[type=button] {
   width: 90px;
 }
 
@@ -318,7 +330,7 @@ button {
   box-shadow: 0px 0px 5px #999;
 }
 
-div#actions input {
+#actions input {
   height: 40px;
   font-size: 1.2em;
   font-weight: bold;
@@ -328,7 +340,7 @@ div#actions input {
   border: 1px outset #fff;
 }
 
-div#actions input:disabled {
+#actions input:disabled {
   color: #666;
   border: 1px outset #666;
 }
@@ -345,32 +357,32 @@ div#help {
   margin-top: 20px;
 }
 
-div#help table {
+#help table {
   font-size: 0.8em;
   border-spacing: 0;
   border-collapse: collapse;
 }
 
-div#help tr {
+#help tr {
   border-bottom : 1px solid #ddd;
 }
 
-div#help td.key {
+#help td.key {
   text-align: right;
   vertical-align: top;
   font-weight: bold;
   padding: 4px;
 }
 
-a#keepHelp:link, a#keepHelp:visited {
+#keepHelp:link, a#keepHelp:visited {
   color: #00E;
 }
 
-a#keepHelp:hover, a#keepHelp:active {
+#keepHelp:hover, a#keepHelp:active {
   color: #551A8B;
 }
 
-div#keepHelpTooltip {
+#keepHelpTooltip {
   position: fixed;
   font-size: 0.8125em;
   padding: 5px;
@@ -384,16 +396,16 @@ div#keepHelpTooltip {
   box-shadow: 0px 0px 5px #999;
 }
 
-div#keepHelpTooltip ol {
+#keepHelpTooltip ol {
   padding-left: 20px;
   margin: 0;
 }
 
-div#keepHelpTooltip a:link, div#keepHelpTooltip a:visited {
+#keepHelpTooltip a:link, #keepHelpTooltip a:visited {
   color: #FFF;
 }
 
-div#keepHelpTooltip a:hover, div#keepHelpTooltip a:active {
+#keepHelpTooltip a:hover, #keepHelpTooltip a:active {
   color: #666;
 }
 
