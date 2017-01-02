@@ -71,7 +71,7 @@ OnSubmit.Using("Game", function (Game)
                     requirements:
                     [
                         { item: Game.Resources.get("Copper Ore"), amount: 1 },
-                        { item: Game.Resources.get("Coal"), amount: 1 },
+                        { item: Game.Resources.get("Coal"), amount: 1 }
                     ]
                 }
             };
@@ -85,7 +85,7 @@ OnSubmit.Using("Game", function (Game)
                     requirements:
                     [
                         { item: Game.Resources.get("Iron Ore"), amount: 1 },
-                        { item: Game.Resources.get("Coal"), amount: 1 },
+                        { item: Game.Resources.get("Coal"), amount: 1 }
                     ]
                 }
             };
@@ -99,7 +99,7 @@ OnSubmit.Using("Game", function (Game)
                     requirements:
                     [
                         { item: Game.Resources.get("Tin Ore"), amount: 1 },
-                        { item: Game.Resources.get("Coal"), amount: 1 },
+                        { item: Game.Resources.get("Coal"), amount: 1 }
                     ]
                 }
             };
@@ -113,7 +113,7 @@ OnSubmit.Using("Game", function (Game)
                     requirements:
                     [
                          { item: Game.Resources.get("Gold Ore"), amount: 1 },
-                         { item: Game.Resources.get("Coal"), amount: 1 },
+                         { item: Game.Resources.get("Coal"), amount: 1 }
                     ]
                 }
             };
@@ -128,7 +128,7 @@ OnSubmit.Using("Game", function (Game)
                     [
                           { item: _items["Tin Bar"], amount: 1 },
                           { item: _items["Copper Bar"], amount: 1 },
-                          { item: Game.Resources.get("Coal"), amount: 1 },
+                          { item: Game.Resources.get("Coal"), amount: 1 }
                     ]
                 }
             };
@@ -142,7 +142,7 @@ OnSubmit.Using("Game", function (Game)
                     requirements:
                     [
                         { item: _items["Iron Bar"], amount: 1 },
-                        { item: Game.Resources.get("Coal"), amount: 1 },
+                        { item: Game.Resources.get("Coal"), amount: 1 }
                     ]
                 }
             };
@@ -158,7 +158,7 @@ OnSubmit.Using("Game", function (Game)
                     [
                         { item: Game.Resources.get("Bauxite Ore"), amount: 1 },
                         { item: Game.Resources.get("Iron Ore"), amount: 1 },
-                        { item: Game.Resources.get("Coal"), amount: 1 },
+                        { item: Game.Resources.get("Coal"), amount: 1 }
                     ]
                 }
             };
@@ -172,7 +172,7 @@ OnSubmit.Using("Game", function (Game)
                     requirements:
                     [
                         { item: Game.Resources.get("Lead Ore"), amount: 3 },
-                        { item: Game.Resources.get("Coal"), amount: 1 },
+                        { item: Game.Resources.get("Coal"), amount: 1 }
                     ]
                 }
             };
@@ -189,7 +189,7 @@ OnSubmit.Using("Game", function (Game)
                     makes: 16,
                     requirements:
                     [
-                        { item: _items["Bronze Bar"], amount: 1 },
+                        { item: _items["Bronze Bar"], amount: 1 }
                     ]
                 }
             };
@@ -203,7 +203,7 @@ OnSubmit.Using("Game", function (Game)
                     makes: 8,
                     requirements:
                     [
-                        { item: _items["Aluminum Bar"], amount: 1 },
+                        { item: _items["Aluminum Bar"], amount: 1 }
                     ]
                 }
             };
@@ -310,7 +310,7 @@ OnSubmit.Using("Game", function (Game)
                         { item: _items["Stick"], amount: 2 },
                         { item: _items["Steel Bar"], amount: 3 },
                         { item: _items["Bronze Rivet"], amount: 4 },
-                        { item: _items["Aluminum Strips"], amount: 8 },
+                        { item: _items["Aluminum Strips"], amount: 8 }
                     ]
                 }
             };

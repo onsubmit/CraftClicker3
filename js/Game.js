@@ -1,13 +1,20 @@
 OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, Strings)
 {
     var w = window;
+
+    var InventorySortType = Game.InventorySortType;
+    var Items = Game.Items;
+    var ItemType = Game.ItemType;
+    var Player = Game.Player;
+    var Resources = Game.Resources;
     
     Game.ViewModel = function ()
     {
         var _this = this;
         var _unlockedRecipeCategoryMap = {};
+        var _cachedElements = {};
 
-        _this.player = new Game.Player();
+        _this.player = new Player();
         _this.difficultyColors = ['#555', '#00DD00', '#E6DE00', '#FF8E46'];
         _this.strings = Strings.StringRepository.getStrings("str");
 
@@ -23,12 +30,12 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                             _this.inventory.keepHelp.visible(true);
                             _this.inventory.keepHelp.shown(true);
                         },
-                    hide: function () { _this.inventory.keepHelp.visible(false); },
+                    hide: function () { _this.inventory.keepHelp.visible(false); }
                 },
             sortByOptions: ko.observableArray(
                 [
-                    { value: _this.strings["SortByAlphabetical"], type: Game.InventorySortType.Alphabetical },
-                    { value: _this.strings["SortByAmount"], type: Game.InventorySortType.Amount }
+                    { value: _this.strings["SortByAlphabetical"], type: InventorySortType.Alphabetical },
+                    { value: _this.strings["SortByAmount"], type: InventorySortType.Amount }
                 ]),
             sortedBy: ko.observable(),
             searchTerm: ko.observable(),
@@ -83,7 +90,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                     // Only sort once per second
                     if (_this.inventory.doSort())
                     {
-                        if (sortBy === Game.InventorySortType.Amount)
+                        if (sortBy === InventorySortType.Amount)
                         {
                             items.sort(function (a, b) { return sort(a.amount(), b.amount()); });
                         }
@@ -215,7 +222,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
             click: function ()
             {
                 _this.playerInfo.level.showDetails(!_this.playerInfo.level.showDetails());
-            },
+            }
         };
 
         _this.gatherText = ko.pureComputed(
@@ -229,12 +236,49 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
         
         _this.step = function ()
         {
-            var drops = _gather();
-            if (drops.length > 0)
+            if (_this.gathering())
             {
-                _this.player.collect(drops);
-                _this.inventory.visible(true);
+                // Prevent gather spam
+                return;
             }
+
+            var gatherTime = 250 + 750 * ((250 - Math.min(_this.player.level(), 250)) / 250.0);
+            _this.gathering(true);
+
+            // Show a progress bar indicating gathering is happening
+            var $gatherProgress = _getElement("#gatherProgress");
+            var fullWidth = $gatherProgress.width();
+
+            $gatherProgress
+                .stop()
+                .removeClass("done")
+                .css("visibility", "visible")
+                .css("opacity", "1")
+                .width(0)
+                .animate(
+                    { width: fullWidth },
+                    gatherTime,
+                    "linear",
+                    function ()
+                    {
+                        var drops = _gather();
+                        if (drops.length > 0)
+                        {
+                            _this.player.collect(drops);
+                            _this.inventory.visible(true);
+                        }
+
+                        _this.gathering(false);
+
+                        // Flash the progress bar green indicating gathering is done
+                        $gatherProgress
+                            .addClass("done")
+                            .fadeTo(1000, 0,
+                                function ()
+                                {
+                                    $gatherProgress.css("visibility", "hidden");
+                                });
+                    });
         };
 
         _this.onlyShowCraftableRecipes = ko.observable();
@@ -251,6 +295,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
         };
 
         _this.itemBeingCrafted = ko.observable();
+        _this.gathering = ko.observable();
 
         _this.selectedRecipe = 
         {
@@ -380,8 +425,8 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
             var drops = [];
             var inventory = _this.player.inventory;
             var pick = inventory.pick();
-            
-            var resources = Game.Resources.getAll();
+
+            var resources = Resources.getAll();
             for (var resourceName in resources)
             {
                 var resource = resources[resourceName];
@@ -392,36 +437,35 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                     break;
                 }
                 
+                var lootModifier = 0;
                 if (resourceName === "Wood")
                 {
-                    if (inventory.getItemAmount(resource) === 0)
-                    {
-                        // When player is out of wood, always drop at least 1
-                        drops.push({ item: resource, amount: Math.round(_rand(1, resource.maxDropAmount))});
-                    }
-                    else if (resource.dropChance > _rand())
-                    {
-                        drops.push({ item: resource, amount: Math.ceil(_rand() * resource.maxDropAmount)});
-                    }
+                    lootModifier = 1;
                 }
-                else
+                else if (pick && pick.lootModifiers[resource.name])
                 {
-                    var lootModifier = (pick && pick.lootModifiers[resource.name]) || 0;
-                    if (lootModifier > 0 && resource.dropChance > _rand())
-                    {
-                        drops.push({ item: resource, amount: lootModifier * Math.ceil(_rand() * resource.maxDropAmount)});
-                    }
+                    lootModifier = pick.lootModifiers[resource.name];
+                }
+
+                if (lootModifier > 0 && resource.dropChance > _rand())
+                {
+                    drops.push({ item: resource, amount: lootModifier * Math.ceil(_rand() * resource.maxDropAmount)});
                 }
             }
             
             if (pick)
             {
                 var newDurability = pick.metaData() - 1;
-                if (newDurability === 0)
+                if (newDurability > 0)
+                {
+                    // The pick is not broken.
+                    pick.metaData(newDurability);
+                }
+                else
                 {
                     // The pick just broke.
                     // Replace it with the highest level pick in the the player's inventory.
-                    var newPick = _this.player.inventory.getHighestLevelItem(Game.ItemType.Pick);
+                    var newPick = _this.player.inventory.getHighestLevelItem(ItemType.Pick);
 
                     if (newPick)
                     {
@@ -432,11 +476,12 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                         _this.player.inventory.removePick();
                     }
                 }
-                else
-                {
-                    // The pick is not broken.
-                    pick.metaData(newDurability);
-                }
+            }
+
+            if (drops.length === 0)
+            {
+                // Always at least drop a little wood
+                drops.push({ item: Resources.get("Wood"), amount: Math.round(_rand(1, resource.maxDropAmount))});
             }
             
             return drops;
@@ -529,7 +574,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
 
         var _unlockRecipe = function (itemName, unlockLevel)
         {
-            var item = Game.Items.unlock(itemName, unlockLevel);
+            var item = Items.unlock(itemName, unlockLevel);
 
             (function(itemInnerScope)
             {
@@ -640,12 +685,17 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
             return { width: width, rgb: rgb };
         };
 
+        function _getElement(selector)
+        {
+            return _cachedElements[selector] || (_cachedElements[selector] = $(selector));
+        }
+
         (function _initialize()
         {
             // Stick is the only initially unlocked recipe.
             _unlockRecipe("Stick");
 
-            var items = Game.Items.getAll();
+            var items = Items.getAll();
             for (var itemName in items)
             {
                 var item = items[itemName];
