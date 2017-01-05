@@ -215,7 +215,7 @@ OnSubmit.Using("Game", function (Game)
             {
                 type: Game.ItemType.Pick,
                 level: 1,
-                maxDurability: 64,
+                maxDurability: 32,
                 lootModifiers:
                 {
                     "Coal": 1,

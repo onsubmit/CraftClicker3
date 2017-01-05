@@ -16,6 +16,7 @@ OnSubmit.Using("Core.Strings", function (CoreStrings)
             strings["CraftTime"] = "Craft time: {0} second"
             strings["CraftTimePlural"] = "Craft time: {0} seconds"
             strings["GatherText"] = "Gather with {0}";
+            strings["GatherUntilPickBreaks"] = "Automatically gather until my pick breaks";
             strings["HaveResources"] = "Have Resources";
             strings["HelpShortcuts"] = "Shortcuts";
             strings["HelpGather"] = "Gather resources";

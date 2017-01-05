@@ -10,13 +10,13 @@ OnSubmit.Using("Game", function (Game)
     {
         var _this = this;
         var _items = {};
-        
+
         _this.itemsArray = ko.observableArray([]);
         _this.pick = ko.observable();
         _this.forge = ko.observable();
         _this.isDirty = ko.observable(false);
 
-        _this.money = 
+        _this.money =
         {
             copper: ko.observable(0),
             silver: ko.observable(0),
@@ -37,7 +37,7 @@ OnSubmit.Using("Game", function (Game)
                 }
             }
         };
-        
+
         _this.mergeItem = function(item, amount, metaDataId)
         {
             metaDataId = parseInt(metaDataId) || 0;
@@ -89,7 +89,7 @@ OnSubmit.Using("Game", function (Game)
                 return 0;
             }
         }
-        
+
         _this.canCraft = function (recipe, amount, effectiveItems)
         {
             amount = amount || 1;
@@ -105,7 +105,7 @@ OnSubmit.Using("Game", function (Game)
                     return false;
                 }
             }
-            
+
             for (var i = 0, length = recipe.requirements.length; i < length; i++)
             {
                 var req = recipe.requirements[i];
@@ -134,7 +134,7 @@ OnSubmit.Using("Game", function (Game)
                     return false;
                 }
             }
-            
+
             return true;
         };
 
@@ -156,10 +156,19 @@ OnSubmit.Using("Game", function (Game)
                         {
                             // The equipped forge is the chosen forge to be used in the craft.
                             // Replace it with the highest level forge in the the player's inventory.
-                            var newForge = _this.getHighestLevelItem(Game.ItemType.Forge);
-                            if (newForge)
+                            // Don't do this if the forge currently being crafted is of higher level.
+                            var bestForge = _this.getHighestLevelItem(Game.ItemType.Forge);
+                            if (bestForge)
                             {
-                                _this.replaceForgeFromInventory(newForge.item, newForge.metaData);
+                                var newForge = new Game.Forge(bestForge.item.name, bestForge.metaData);
+                                if (item.type === Game.ItemType.Forge && item.level < newForge.level)
+                                {
+                                    _this.replaceForgeFromInventory(newForge, bestForge.metaData);
+                                }
+                                else
+                                {
+                                    _this.removeForge();
+                                }
                             }
                             else
                             {
@@ -187,10 +196,11 @@ OnSubmit.Using("Game", function (Game)
                 {
                     // The forge just broke.
                     // Replace it with the highest level forge in the the player's inventory.
-                    var newForge = _this.getHighestLevelItem(Game.ItemType.Forge);
-                    if (newForge)
+                    var bestForge = _this.getHighestLevelItem(Game.ItemType.Forge);
+                    if (bestForge)
                     {
-                        _this.replaceForgeFromInventory(newForge.item, newForge.metaData);
+                        var newForge = new Game.Forge(bestForge.item.name, bestForge.metaData);
+                        _this.replaceForgeFromInventory(newForge, bestForge.metaData);
                     }
                     else
                     {
@@ -262,7 +272,7 @@ OnSubmit.Using("Game", function (Game)
             var numToSell = _this.mergeItemOrSell(item, amount * recipe.makes, metaDataId);
             return { continueCrafting: continueCrafting, numToSell: numToSell };
         };
-        
+
         _this.replacePickFromInventory = function (newPick, metaDataId)
         {
             _this.removeItem(newPick, 1, metaDataId);
@@ -274,7 +284,7 @@ OnSubmit.Using("Game", function (Game)
             _this.removeItem(newForge, 1, metaDataId);
             _this.forge(newForge);
         };
-        
+
         _this.removePick = function ()
         {
             _this.pick(null);
@@ -284,7 +294,7 @@ OnSubmit.Using("Game", function (Game)
         {
             _this.forge(null);
         };
-        
+
         _this.removeItem = function (item, amount, metaDataId)
         {
             metaDataId = parseInt(metaDataId) || 0;
@@ -331,9 +341,9 @@ OnSubmit.Using("Game", function (Game)
             if (!_items[itemName])
             {
                 _this.mergeItem(item, 0);
-                
+
             }
-            
+
             return _items[itemName].total;
         };
 
@@ -342,7 +352,7 @@ OnSubmit.Using("Game", function (Game)
             var bestItem = null;
             var highestLevel = 0;
             var lowestDurability = -1;
-            
+
             for (var itemName in _items)
             {
                 var item = _items[itemName].item;
@@ -541,7 +551,7 @@ OnSubmit.Using("Game", function (Game)
                 inventoryItem.amounts[metaDataId].amount.valueHasMutated();
             }
 
-            var newItem = 
+            var newItem =
                 {
                     id: inventoryItem.amounts[metaDataId].toString(),
                     amount: inventoryItem.amounts[metaDataId].amount,

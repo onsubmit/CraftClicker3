@@ -7,7 +7,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
     var ItemType = Game.ItemType;
     var Player = Game.Player;
     var Resources = Game.Resources;
-    
+
     Game.ViewModel = function ()
     {
         var _this = this;
@@ -149,7 +149,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                     function ()
                     {
                         var pick = _this.player.inventory.pick();
-                        return pick && _this.pick.durability.amount() !== pick.maxDurability; 
+                        return pick && _this.pick.durability.amount() !== pick.maxDurability;
                     })
             },
             image: ko.pureComputed(
@@ -177,7 +177,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                     function ()
                     {
                         var forge = _this.player.inventory.forge();
-                        return forge && _this.forge.durability.amount() !== forge.maxDurability; 
+                        return forge && _this.forge.durability.amount() !== forge.maxDurability;
                     })
             },
             image: ko.pureComputed(
@@ -215,7 +215,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                         {
                             return Math.round(_this.player.xp()) + ' / ' + _this.player.xpMax();
                         }
-                        
+
                         return Helpers.String.format(_this.strings["Level"], _this.player.level());
                     })
             },
@@ -232,8 +232,9 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                 var currentPickName = pick ? pick.name : _this.strings["BareHands"];
                 return Helpers.String.format(_this.strings["GatherText"], currentPickName);
             });
-            
-        
+
+        _this.gatherUntilPickBreaks = ko.observable(false);
+
         _this.step = function ()
         {
             if (_this.gathering())
@@ -242,7 +243,14 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                 return;
             }
 
-            var gatherTime = 250 + 750 * ((250 - Math.min(_this.player.level(), 250)) / 250.0);
+            var gatherTime = OnSubmit.cheat ? 0 : 250 + 750 * ((250 - Math.min(_this.player.level(), 250)) / 250.0);
+            var pick = _this.player.inventory.pick();
+            if (pick)
+            {
+                // Picks get faster as they break
+                gatherTime = gatherTime / (4.0 - 3.0 * Math.sqrt(pick.getDurabilityPercentage()))
+            }
+
             _this.gathering(true);
 
             // Show a progress bar indicating gathering is happening
@@ -269,15 +277,22 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                         }
 
                         _this.gathering(false);
-
-                        // Flash the progress bar green indicating gathering is done
-                        $gatherProgress
-                            .addClass("done")
-                            .fadeTo(1000, 0,
-                                function ()
-                                {
-                                    $gatherProgress.css("visibility", "hidden");
-                                });
+                        if (_this.gatherUntilPickBreaks() && _this.player.inventory.pick())
+                        {
+                            // Invoking _this.step() directly blows up the stack
+                            setTimeout(_this.step, 0);
+                        }
+                        else
+                        {
+                            // Flash the progress bar green indicating gathering is done
+                            $gatherProgress
+                                .addClass("done")
+                                .fadeTo(1000, 0,
+                                    function ()
+                                    {
+                                        $gatherProgress.css("visibility", "hidden");
+                                    });
+                        }
                     });
         };
 
@@ -296,8 +311,14 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
 
         _this.itemBeingCrafted = ko.observable();
         _this.gathering = ko.observable();
+        _this.allowAction = ko.pureComputed(
+            function()
+            {
+                return !_this.itemBeingCrafted() && !_this.gathering();
+            }
+        )
 
-        _this.selectedRecipe = 
+        _this.selectedRecipe =
         {
             item: ko.observable(),
             name: ko.pureComputed(
@@ -367,7 +388,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
             },
             requirements: ko.observableArray([])
         }
-        
+
         _this.selectRecipe = function (item, event)
         {
             item.selected(true);
@@ -404,7 +425,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
         {
             _craft(true);
         }
-        
+
         _this.craft = function ()
         {
             _craft(false);
@@ -416,7 +437,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
             {
                 return Math.random() * (max - min) + min;
             }
-            
+
             return Math.random();
         }
 
@@ -430,13 +451,13 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
             for (var resourceName in resources)
             {
                 var resource = resources[resourceName];
-                
+
                 // Stop processing items if the player's level is too low
                 if (resource.minLevel > _this.player.level)
                 {
                     break;
                 }
-                
+
                 var lootModifier = 0;
                 if (resourceName === "Wood")
                 {
@@ -452,7 +473,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                     drops.push({ item: resource, amount: lootModifier * Math.ceil(_rand() * resource.maxDropAmount)});
                 }
             }
-            
+
             if (pick)
             {
                 var newDurability = pick.metaData() - 1;
@@ -465,11 +486,11 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                 {
                     // The pick just broke.
                     // Replace it with the highest level pick in the the player's inventory.
-                    var newPick = _this.player.inventory.getHighestLevelItem(ItemType.Pick);
-
-                    if (newPick)
+                    var bestPick = _this.player.inventory.getHighestLevelItem(ItemType.Pick);
+                    if (bestPick)
                     {
-                        _this.player.inventory.replacePickFromInventory(newPick.item, newPick.metaData);
+                        var newPick = new Game.Pick(bestPick.item.name, bestPick.metaData);
+                        _this.player.inventory.replacePickFromInventory(newPick, bestPick.metaData);
                     }
                     else
                     {
@@ -483,33 +504,41 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                 // Always at least drop a little wood
                 drops.push({ item: Resources.get("Wood"), amount: Math.round(_rand(1, resource.maxDropAmount))});
             }
-            
+
             return drops;
         };
 
         var _craft = function (craftAsManyAsPossible)
         {
+            if (_this.itemBeingCrafted())
+            {
+                // Prevent crafting if it's already happening.
+                return;
+            }
+
             var selectedItem = _this.selectedRecipe.item();
             if (!selectedItem)
             {
                 return;
             }
 
+            selectedItem.crafting(true);
+            _this.itemBeingCrafted(selectedItem);
+
             var amount = (!craftAsManyAsPossible && parseInt(_this.craftAmount.value())) || 1;
             var canCraft = _this.player.inventory.canCraft(selectedItem.recipe, amount);
             if (!canCraft)
             {
                 alert("Can't craft");
+                selectedItem.crafting(false);
+                _this.itemBeingCrafted(null);
                 _this.craftAmount.value(1);
                 return;
             }
-            
+
             var craftTime = Math.round(selectedItem.recipe.craftTime * 1000);
             craftTime = OnSubmit.cheat ? 0 : craftTime;
             craftTime = (OnSubmit.slow ? craftTime * 10 : craftTime);
-            
-            selectedItem.crafting(true);
-            _this.itemBeingCrafted(selectedItem);
 
             var counter = 0;
             (function doCraft (item)
@@ -545,7 +574,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                                 _this.craftAmount.value(amount);
                             }
 
-                            doCraft(item);
+                            setTimeout(function () { doCraft(item); }, 0);
                         }
                         else
                         {
@@ -719,7 +748,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                                 {
                                     return '#fff';
                                 }
-                                
+
                                 return _this.difficultyColors[itemInnerScope.recipe.difficulty()];
                             });
                     })(item);
@@ -844,7 +873,7 @@ OnSubmit.Using("Game", "Core.Helpers", "Core.Strings", function (Game, Helpers, 
                     })(item);
                 }
             }
-            
+
             _this.player.level.valueHasMutated();
 
             _this.player.inventory.pick.subscribe(

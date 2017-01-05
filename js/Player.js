@@ -5,7 +5,7 @@ OnSubmit.Using("Game", function (Game)
         var _this = this;
         var _skillIncreaseChanges = [0, 0.25, 0.75, 1];
         var _xpPercentages = [0, 0.2, 0.325, 0.9];
-        
+
         _this.level = ko.observable(0);
         _this.maxLevel = ko.observable(2);
         _this.inventory = new Game.Inventory();
@@ -14,19 +14,39 @@ OnSubmit.Using("Game", function (Game)
         _this.xp = ko.observable(0);
         _this.xpMax = ko.observable(20);
 
-        var _addXP = function (recipe, xpModifier)
+        var _addXP = function (amount)
+        {
+            var currentXP = _this.xp();
+            _this.xp(currentXP + amount);
+
+            if (_this.xp() >= _this.xpMax())
+            {
+                _levelUp();
+            }
+        };
+
+        var _addXPFromCrafting = function (recipe, xpModifier)
         {
             var diff = _this.determineRecipeDifficulty(recipe);
             var xpPercentIncrease = _xpPercentages[diff];
             if (xpPercentIncrease > 0)
             {
-                var currentXP = _this.xp();
-                _this.xp(currentXP + Math.round(xpModifier * _this.xpMax() * (xpPercentIncrease + 0.05 * Math.random()) / (_this.level() + 1)));
+                var xpAwarded = Math.round(xpModifier * _this.xpMax() * (xpPercentIncrease + 0.05 * Math.random()) / (_this.level() + 3));
+                _addXP(xpAwarded);
+            }
+        };
+
+        var _addXPFromCollecting = function (drops)
+        {
+            var xpAwarded = 0;
+            for (var prop in drops)
+            {
+                xpAwarded += drops[prop].item.sellValue;
             }
 
-            if (_this.xp() >= _this.xpMax())
+            if (xpAwarded > 0)
             {
-                _levelUp();
+                _addXP(xpAwarded);
             }
         };
 
@@ -36,15 +56,16 @@ OnSubmit.Using("Game", function (Game)
             _this.xp(_this.xp() - _this.xpMax());
             _this.xpMax(_this.xpMax() + _this.level() * 2);
         };
-        
+
         _this.collect = function (drops)
         {
             _this.inventory.collect(drops);
+            _addXPFromCollecting(drops);
         };
 
         _this.craft = function (item, xpModifier)
         {
-            _addXP(item.recipe, xpModifier);
+            _addXPFromCrafting(item.recipe, xpModifier);
 
             // Consume the resources from the inventory.
             var craftInfo = _this.inventory.craft(item);

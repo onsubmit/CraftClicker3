@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>CraftClicker 3.11 beta</title>
+    <title>CraftClicker 3.12 beta</title>
     <script src="js/Core/knockout-3.3.0.debug.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="js/Core/KnockoutExtensions.js"></script>
@@ -17,14 +17,18 @@
     <script src="js/Inventory.js"></script>
     <script src="js/Player.js"></script>
     <script src="js/Game.js"></script>
-    <link type="text/css" href="css/styles.css" rel="stylesheet"  />
+    <link type="text/css" href="css/styles.css" rel="stylesheet" />
   </head>
   <body>
     <div id="container">
         <div class="floatLeft">
             <div id="gatherActions">
-                <button id="gather" data-bind="click: step, text: gatherText, enable: !gathering() && !itemBeingCrafted()"></button>
+                <button id="gather" data-bind="click: step, text: gatherText, enable: allowAction"></button>
                 <div id="gatherProgress" class="gatherProgress"></div>
+                <label data-bind="visible: player.inventory.pick">
+                    <input type="checkbox" data-bind="checked: gatherUntilPickBreaks" />
+                    <span data-bind="text: strings['GatherUntilPickBreaks']"></span>
+                </label>
             </div>
             <div id="recipes">
                 <div id="experience" class="smallBar">
@@ -84,7 +88,7 @@
                         <li data-bind="
                             click: $root.selectRecipe,
                             visible: item.visible,
-                            event: { 'dblclick': !$root.itemBeingCrafted() && $root.craft },
+                            event: { 'dblclick': $root.craft },
                             style:
                             {
                                 color: item.recipe.color,
@@ -137,9 +141,9 @@
                     </div>
                 </div>
                 <div id="actions">
-                    <input id="craftAll" type="button" data-bind="click: craftAll, value: strings['CraftAll'], enable: !itemBeingCrafted()" />
-                    <input id="craftAmount" type="tel" value="1" data-bind="numeric, textInput: craftAmount.value, enable: !itemBeingCrafted(), event: { 'focus': craftAmount.onFocus }" />
-                    <input id="craft" type="button" data-bind="click: craft, value: strings['Craft'], visible: !itemBeingCrafted()" />
+                    <input id="craftAll" type="button" data-bind="click: craftAll, value: strings['CraftAll'], enable: allowAction" />
+                    <input id="craftAmount" type="tel" value="1" data-bind="numeric, textInput: craftAmount.value, enable: allowAction, event: { 'focus': craftAmount.onFocus }" />
+                    <input id="craft" type="button" data-bind="click: craft, value: strings['Craft'], enable: allowAction, visible: !itemBeingCrafted()" />
                     <input id="cancel" type="button" data-bind="click: cancelCraft, value: strings['Cancel'], visible: itemBeingCrafted" />
                 </div>
             </div>

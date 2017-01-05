@@ -1,6 +1,6 @@
 OnSubmit.Using("Game", function (Game)
 {
-    Game.Forge = function (forgeName)
+    Game.Forge = function (forgeName, metaData)
     {
         var _this = this;
         var _item = Game.Items.get(forgeName);
@@ -9,7 +9,7 @@ OnSubmit.Using("Game", function (Game)
         _this.type = _item.type;
         _this.image = _item.image;
         _this.level = _item.level;
-        _this.metaData = ko.observable(_item.maxDurability);
+        _this.metaData = ko.observable(metaData !== undefined ? metaData : _item.maxDurability);
         _this.maxDurability = _item.maxDurability;
         _this.smeltModifiers = _item.smeltModifiers;
 
